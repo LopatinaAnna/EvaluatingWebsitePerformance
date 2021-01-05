@@ -12,7 +12,7 @@ namespace EvaluatingWebsitePerformance.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "202101051914330_InitEntities"; }
+            get { return "202101052002237_InitEntities"; }
         }
         
         string IMigrationMetadata.Source

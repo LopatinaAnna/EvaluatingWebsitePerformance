@@ -2,11 +2,19 @@
 using System.Net;
 using System.Web.Mvc;
 using System.Web.Helpers;
+using EvaluatingWebsitePerformance.BusinessLogic.Interfaces;
 
 namespace EvaluatingWebsitePerformance.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IBaseRequestService baseRequestService;
+
+        public HomeController(IBaseRequestService baseRequestService)
+        {
+            this.baseRequestService = baseRequestService;
+        }
+
         [HttpGet]
         public ActionResult Index()
         {

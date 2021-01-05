@@ -81,15 +81,12 @@ namespace EvaluatingWebsitePerformance.Migrations
                         Id = c.Int(nullable: false, identity: true),
                         BaseRequestUrl = c.String(),
                         Creation = c.DateTime(nullable: false),
-                        UserId = c.Int(nullable: false),
-                        User_Id = c.String(maxLength: 128),
-                        User_Id1 = c.String(maxLength: 128),
+                        UserId = c.String(maxLength: 128),
                     })
                 .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.AspNetUsers", t => t.User_Id)
-                .ForeignKey("dbo.Users", t => t.User_Id1)
-                .Index(t => t.User_Id)
-                .Index(t => t.User_Id1);
+                .ForeignKey("dbo.AspNetUsers", t => t.UserId)
+                .ForeignKey("dbo.Users", t => t.UserId)
+                .Index(t => t.UserId);
             
             CreateTable(
                 "dbo.SitemapRequests",
@@ -120,8 +117,8 @@ namespace EvaluatingWebsitePerformance.Migrations
         public override void Down()
         {
             DropForeignKey("dbo.AspNetUserRoles", "RoleId", "dbo.AspNetRoles");
-            DropForeignKey("dbo.BaseRequests", "User_Id1", "dbo.Users");
-            DropForeignKey("dbo.BaseRequests", "User_Id", "dbo.AspNetUsers");
+            DropForeignKey("dbo.BaseRequests", "UserId", "dbo.Users");
+            DropForeignKey("dbo.BaseRequests", "UserId", "dbo.AspNetUsers");
             DropForeignKey("dbo.SitemapRequests", "BaseRequestId", "dbo.BaseRequests");
             DropForeignKey("dbo.Users", "Id", "dbo.AspNetUsers");
             DropForeignKey("dbo.AspNetUserRoles", "UserId", "dbo.AspNetUsers");
@@ -129,8 +126,7 @@ namespace EvaluatingWebsitePerformance.Migrations
             DropForeignKey("dbo.AspNetUserClaims", "UserId", "dbo.AspNetUsers");
             DropIndex("dbo.AspNetRoles", "RoleNameIndex");
             DropIndex("dbo.SitemapRequests", new[] { "BaseRequestId" });
-            DropIndex("dbo.BaseRequests", new[] { "User_Id1" });
-            DropIndex("dbo.BaseRequests", new[] { "User_Id" });
+            DropIndex("dbo.BaseRequests", new[] { "UserId" });
             DropIndex("dbo.AspNetUserRoles", new[] { "RoleId" });
             DropIndex("dbo.AspNetUserRoles", new[] { "UserId" });
             DropIndex("dbo.AspNetUserLogins", new[] { "UserId" });

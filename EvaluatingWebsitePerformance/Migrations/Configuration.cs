@@ -1,16 +1,15 @@
 namespace EvaluatingWebsitePerformance.Migrations
 {
     using System.Data.Entity.Migrations;
-    using EvaluatingWebsitePerformance.Data;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<DbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<EvaluatingWebsitePerformance.Data.ApplicationDbContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(DbContext context)
+        protected override void Seed(EvaluatingWebsitePerformance.Data.ApplicationDbContext context)
         {
         }
     }

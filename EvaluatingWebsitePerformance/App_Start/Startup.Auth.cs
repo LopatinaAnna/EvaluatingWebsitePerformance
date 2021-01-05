@@ -13,7 +13,7 @@ namespace EvaluatingWebsitePerformance
     {
         public void ConfigureAuth(IAppBuilder app)
         {
-            app.CreatePerOwinContext(DbContext.Create);
+            app.CreatePerOwinContext(ApplicationDbContext.Create);
             app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
             app.CreatePerOwinContext<ApplicationSignInManager>(ApplicationSignInManager.Create);
 

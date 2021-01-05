@@ -4,15 +4,15 @@ using System.Data.Entity;
 
 namespace EvaluatingWebsitePerformance.Data
 {
-    public class DbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public DbContext() : base("DefaultConnection")
+        public ApplicationDbContext() : base("DefaultConnection")
         {
         }
 
-        public static DbContext Create()
+        public static ApplicationDbContext Create()
         {
-            return new DbContext();
+            return new ApplicationDbContext();
         }
         public virtual DbSet<BaseRequest> SharedFiles { get; set; }
         public virtual DbSet<SitemapRequest> Storages { get; set; }
