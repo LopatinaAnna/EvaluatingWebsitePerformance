@@ -1,4 +1,5 @@
-﻿using EvaluatingWebsitePerformance.Models;
+﻿using EvaluatingWebsitePerformance.Data;
+using EvaluatingWebsitePerformance.Data.Entities;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
@@ -12,7 +13,7 @@ namespace EvaluatingWebsitePerformance
     {
         public void ConfigureAuth(IAppBuilder app)
         {
-            app.CreatePerOwinContext(ApplicationDbContext.Create);
+            app.CreatePerOwinContext(DbContext.Create);
             app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
             app.CreatePerOwinContext<ApplicationSignInManager>(ApplicationSignInManager.Create);
 

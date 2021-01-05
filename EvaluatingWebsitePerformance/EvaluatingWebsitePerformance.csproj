@@ -170,18 +170,28 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Data\DbContext.cs" />
+    <Compile Include="Data\Entities\ApplicationUser.cs" />
+    <Compile Include="Data\Entities\BaseEntity.cs" />
+    <Compile Include="Data\Entities\BaseRequest.cs" />
+    <Compile Include="Data\Entities\SitemapRequest.cs" />
+    <Compile Include="Data\Entities\User.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202101051914330_InitEntities.cs" />
+    <Compile Include="Migrations\202101051914330_InitEntities.Designer.cs">
+      <DependentUpon>202101051914330_InitEntities.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
-    <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\EvaluatingWebsitePerformance.mdf" />
-    <Content Include="App_Data\EvaluatingWebsitePerformance_log.ldf">
-      <DependentUpon>EvaluatingWebsitePerformance.mdf</DependentUpon>
+    <Content Include="App_Data\EvaluatingWebsitePerformance1.mdf" />
+    <Content Include="App_Data\EvaluatingWebsitePerformance1_log.ldf">
+      <DependentUpon>EvaluatingWebsitePerformance1.mdf</DependentUpon>
     </Content>
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
@@ -223,6 +233,9 @@
     <Content Include="Views\Home\MeasureResponseTime.cshtml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="BusinessLogic\Interfaces\" />
+    <Folder Include="BusinessLogic\Models\" />
+    <Folder Include="BusinessLogic\Services\" />
     <Folder Include="Views\History\" />
   </ItemGroup>
   <ItemGroup>
@@ -237,6 +250,11 @@
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202101051914330_InitEntities.resx">
+      <DependentUpon>202101051914330_InitEntities.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

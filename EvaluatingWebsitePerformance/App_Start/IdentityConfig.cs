@@ -1,4 +1,5 @@
-﻿using EvaluatingWebsitePerformance.Models;
+﻿using EvaluatingWebsitePerformance.Data;
+using EvaluatingWebsitePerformance.Data.Entities;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
@@ -18,7 +19,7 @@ namespace EvaluatingWebsitePerformance
 
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
-            var manager = new ApplicationUserManager(new UserStore<ApplicationUser>(context.Get<ApplicationDbContext>()));
+            var manager = new ApplicationUserManager(new UserStore<ApplicationUser>(context.Get<DbContext>()));
 
             manager.UserValidator = new UserValidator<ApplicationUser>(manager)
             {

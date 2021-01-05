@@ -32,9 +32,9 @@ namespace EvaluatingWebsitePerformance.Controllers
         }
 
         [HttpGet]
-        public ActionResult MeasureResponseTime(double? time)
+        public ActionResult MeasureResponseTime(double time = 0)
         {
-            return View(System.Math.Round(time.GetValueOrDefault(), 3));
+            return View(System.Math.Round(time, 3));
         }
 
         //public ActionResult CreateChart()
