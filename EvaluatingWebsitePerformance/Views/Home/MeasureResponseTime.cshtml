@@ -1,4 +1,9 @@
 ﻿@model EvaluatingWebsitePerformance.Models.BaseRequestViewModel
+@using EvaluatingWebsitePerformance.Infrastructure.Helpers
+
+<br />
+@Html.CreateChart(Model.SitemapRequests)
+<br />
 <br />
 <table class="table table-striped table-hover">
     <thead>
@@ -19,77 +24,3 @@
         }
     </tbody>
 </table>
-
-
-
-@*<div>
-        <img src="@Url.Action("CreateChart")" />
-    </div>*@
-
-
-@*<script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-
-    <figure class="highcharts-figure">
-        <div id="container"></div>
-    </figure>
-
-    <script>
-        Highcharts.chart('container', {
-            chart: {
-                type: 'column'
-            },
-            title: {
-                text: 'Evaluating website.com performance'
-            },
-            xAxis: {
-                categories: [
-                    '1',
-                    '2',
-                    '3',
-                    '4',
-                    '5'
-                ],
-                crosshair: true
-            },
-            yAxis: {
-                min: 0,
-                title: {
-                    text: 'Evaluating (seconds)'
-                }
-            },
-            tooltip: {
-                headerFormat: '<span style="font-size:10px">{point.key} attempt</span><table>',
-                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-                    '<td style="padding:0"><b>{point.y:.3f} ms</b></td></tr>',
-                footerFormat: '</table>',
-                shared: true,
-                useHTML: true
-            },
-            plotOptions: {
-                column: {
-                    pointPadding: 0.2,
-                    borderWidth: 0
-                }
-            },
-            series: [{
-                name: 'website.com',
-                data: [216, 301]
-
-            }, {
-                name: 'website.com/news',
-                data: [123, 201]
-
-            }, {
-                name: 'website.com/about',
-                data: [423, 401]
-
-            }, {
-                name: 'website.com/contacts',
-                data: [223, 323]
-
-            }]
-        });
-    </script>*@

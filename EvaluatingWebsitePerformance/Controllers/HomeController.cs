@@ -1,12 +1,10 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Web.Mvc;
-using System.Web.Helpers;
+﻿using System.Web.Mvc;
 using EvaluatingWebsitePerformance.BusinessLogic.Interfaces;
 using Microsoft.AspNet.Identity;
 using System.Threading.Tasks;
 using EvaluatingWebsitePerformance.Data.Entities;
 using EvaluatingWebsitePerformance.Models;
+using System.Linq;
 
 namespace EvaluatingWebsitePerformance.Controllers
 {
@@ -28,21 +26,24 @@ namespace EvaluatingWebsitePerformance.Controllers
         [HttpPost]
         public async Task<ActionResult> MeasureResponseTime(string url)
         {
-            if(string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(url))
             {
                 return RedirectToAction("Index");
             }
 
             BaseRequest item = await baseRequestService.AddBaseRequest(url, User.Identity.GetUserId());
-            
+
             ViewData["url"] = url;
 
-            var resultModel = new BaseRequestViewModel 
-            { 
-                BaseRequestUrl = item.BaseRequestUrl, 
-                Creation = item.Creation, 
-                SitemapRequests = item.SitemapRequests 
+            var resultModel = new BaseRequestViewModel
+            {
+                BaseRequestUrl = item.BaseRequestUrl,
+                Creation = item.Creation,
+                SitemapRequests = item.SitemapRequests
+                .OrderBy(c => c.MinResponseTime)
+                .ToList()
             };
+
             return MeasureResponseTime(resultModel);
         }
 
@@ -51,20 +52,5 @@ namespace EvaluatingWebsitePerformance.Controllers
         {
             return View(model);
         }
-
-        //public ActionResult CreateChart(
-        //{
-
-        //    var chart = new Chart(width: 500, height: 200)
-        //          .AddTitle("График посещений")
-        //          .AddSeries(
-        //                 name: "Моя программа",
-        //                 legend: "Моя программа",
-        //                 chartType: "Line",
-        //                 xValue: new[] { "Peter", "Andrew", "Julie", "Mary", "Dave" },
-        //                 yValues: new[] { "2", "6", "4", "5", "3" });
-
-        //    return File(chart.ToWebImage().GetBytes(), "image/jpeg");
-        //}
     }
 }

@@ -195,6 +195,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\Helpers\ChartHelpers.cs" />
     <Compile Include="Infrastructure\NinjectRegistrations.cs" />
     <Compile Include="Migrations\202101060037154_InitEntities.cs" />
     <Compile Include="Migrations\202101060037154_InitEntities.Designer.cs">
@@ -219,7 +220,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
-    <Content Include="Scripts\get-chart.js" />
+    <Content Include="Scripts\chart_by_Highcharts.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
@@ -251,7 +252,6 @@
     <Content Include="Views\Home\MeasureResponseTime.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="BusinessLogic\Models\" />
     <Folder Include="Views\History\" />
   </ItemGroup>
   <ItemGroup>

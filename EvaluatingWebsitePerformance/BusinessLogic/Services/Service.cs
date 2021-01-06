@@ -2,7 +2,6 @@
 using EvaluatingWebsitePerformance.Data;
 using EvaluatingWebsitePerformance.Data.Entities;
 using HtmlAgilityPack;
-using Microsoft.Ajax.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -77,7 +76,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             foreach (var item in sitemapUrls)
             {
-                var sitemapRequest = new SitemapRequest { SitemapRequestUrl = item };
+                var sitemapRequest = new SitemapRequest { SitemapRequestUrl = item, BaseRequestId = baseRequestId };
 
                 for (int i = 0; i < ATTEMPT_COUNT; i++)
                 {
@@ -88,26 +87,28 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
                     try
                     {
                         request.GetResponse();
-                        timer.Stop();
-
-                        double time = Math.Round(timer.Elapsed.TotalMilliseconds);
-
-                        sitemapRequest.ResponseTimes.Add(time);
                     }
                     catch
                     {
-                        i--;
+                        break;
                     }
+
+                    timer.Stop();
+
+                    double time = Math.Round(timer.Elapsed.TotalMilliseconds);
+
+                    sitemapRequest.ResponseTimes.Add(time);
                 }
 
-                sitemapRequest.BaseRequestId = baseRequestId;
-                sitemapRequest.MinResponseTime = sitemapRequest.ResponseTimes.Min();
-                sitemapRequest.MaxResponseTime = sitemapRequest.ResponseTimes.Max();
-                
-                AddSitemapRequest(sitemapRequest);
-                sitemapRequests.Add(sitemapRequest);
-            }
+                if (sitemapRequest.ResponseTimes.Count >= 2)
+                {
+                    sitemapRequest.MinResponseTime = sitemapRequest.ResponseTimes.Min();
+                    sitemapRequest.MaxResponseTime = sitemapRequest.ResponseTimes.Max();
 
+                    AddSitemapRequest(sitemapRequest);
+                    sitemapRequests.Add(sitemapRequest);
+                }
+            }
 
             return sitemapRequests;
         }
