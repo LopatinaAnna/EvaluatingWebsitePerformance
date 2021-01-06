@@ -2,6 +2,7 @@
 namespace EvaluatingWebsitePerformance.Migrations
 {
     using System.CodeDom.Compiler;
+    using System.Data.Entity.Migrations;
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
@@ -12,7 +13,7 @@ namespace EvaluatingWebsitePerformance.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "202101052002237_InitEntities"; }
+            get { return "202101060037154_InitEntities"; }
         }
         
         string IMigrationMetadata.Source

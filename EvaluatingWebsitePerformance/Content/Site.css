@@ -25,12 +25,12 @@ textarea {
 
 .input-url {
     height: 100px;
-    margin-top: 30px;
+    padding-top: 30px;
 }
 
 main{
 
-    min-height: calc(100vh - 172px);
+    min-height: calc(100vh - 145px);
 }
 
 .highcharts-figure, .highcharts-data-table table {

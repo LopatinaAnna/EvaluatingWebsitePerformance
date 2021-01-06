@@ -14,9 +14,9 @@ namespace EvaluatingWebsitePerformance.Data
         {
             return new ApplicationDbContext();
         }
-        public virtual DbSet<BaseRequest> SharedFiles { get; set; }
-        public virtual DbSet<SitemapRequest> Storages { get; set; }
-        public virtual DbSet<User> ClientProfiles { get; set; }
+
+        public virtual DbSet<BaseRequest> BaseRequests { get; set; }
+        public virtual DbSet<SitemapRequest> SitemapRequests { get; set; }
     }
 
 }

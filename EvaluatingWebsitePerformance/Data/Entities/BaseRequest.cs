@@ -7,12 +7,10 @@ namespace EvaluatingWebsitePerformance.Data.Entities
     {
         public string BaseRequestUrl { get; set; } 
 
-        public List<SitemapRequest> SitemapRequests { get; set; } = new List<SitemapRequest>();
-
         public DateTime Creation { get; set; }
 
         public string UserId { get; set; }
-
-        public ApplicationUser User { get; set; }
+        
+        public List<SitemapRequest> SitemapRequests { get; set; } = new List<SitemapRequest>();
     }
 }

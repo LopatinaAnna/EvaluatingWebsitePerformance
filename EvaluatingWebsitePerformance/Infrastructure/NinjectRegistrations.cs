@@ -8,7 +8,7 @@ namespace EvaluatingWebsitePerformance.Infrastructure
     {
         public override void Load()
         {
-            Bind<IBaseRequestService>().To<BaseRequestService>();
+            Bind<IService>().To<Service>();
         }
     }
 
