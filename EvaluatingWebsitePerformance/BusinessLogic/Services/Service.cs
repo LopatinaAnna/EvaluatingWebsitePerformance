@@ -16,9 +16,9 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
     {
         private readonly ApplicationDbContext context;
 
-        private const int ATTEMPT_COUNT = 2;
+        private const int ATTEMPT_COUNT = 3;
 
-        private const int SITEMAP_URLS_COUNT = 10;
+        private const int SITEMAP_URLS_COUNT = 15;
 
         public Service(ApplicationDbContext _context)
         {

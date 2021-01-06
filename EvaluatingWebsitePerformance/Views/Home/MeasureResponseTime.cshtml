@@ -1,13 +1,19 @@
 ﻿@model EvaluatingWebsitePerformance.Models.BaseRequestViewModel
 @using EvaluatingWebsitePerformance.Infrastructure.Helpers
-
+@{
+    ViewBag.Title = "Results";
+    var i = 1;
+    var uri = new Uri(Model.BaseRequestUrl).Host;
+}
 <br />
+<h3 class="text-center">Evaluating &quot;@uri&quot; performance</h3>
 @Html.CreateChart(Model.SitemapRequests)
 <br />
 <br />
 <table class="table table-striped table-hover">
     <thead>
         <tr>
+            <th scope="col">#</th>
             <th scope="col">URL</th>
             <th scope="col">Min response, ms</th>
             <th scope="col">Max response, ms</th>
@@ -17,10 +23,12 @@
         @foreach (var sitemapUrl in Model.SitemapRequests)
         {
             <tr>
-                <td>@sitemapUrl.SitemapRequestUrl</td>
+                <th>@i</th>
+                <td><a href="@sitemapUrl.SitemapRequestUrl">@sitemapUrl.SitemapRequestUrl</a></td>
                 <td>@sitemapUrl.MinResponseTime</td>
                 <td>@sitemapUrl.MaxResponseTime</td>
             </tr>
+            i++;
         }
     </tbody>
 </table>

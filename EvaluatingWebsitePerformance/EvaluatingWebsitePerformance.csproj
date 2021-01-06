@@ -64,6 +64,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.DataVisualization" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -196,6 +197,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Infrastructure\Helpers\ChartHelpers.cs" />
+    <Compile Include="Infrastructure\Helpers\ChartSettings.cs" />
     <Compile Include="Infrastructure\NinjectRegistrations.cs" />
     <Compile Include="Migrations\202101060037154_InitEntities.cs" />
     <Compile Include="Migrations\202101060037154_InitEntities.Designer.cs">

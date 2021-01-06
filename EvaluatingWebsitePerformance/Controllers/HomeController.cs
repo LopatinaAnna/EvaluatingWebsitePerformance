@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using EvaluatingWebsitePerformance.Data.Entities;
 using EvaluatingWebsitePerformance.Models;
 using System.Linq;
+using HtmlAgilityPack;
 
 namespace EvaluatingWebsitePerformance.Controllers
 {
@@ -26,13 +27,17 @@ namespace EvaluatingWebsitePerformance.Controllers
         [HttpPost]
         public async Task<ActionResult> MeasureResponseTime(string url)
         {
-            if (string.IsNullOrEmpty(url))
+            try
+            {
+                new System.Uri(url);
+                new HtmlWeb().Load(url);
+            }
+            catch
             {
                 return RedirectToAction("Index");
             }
 
             BaseRequest item = await baseRequestService.AddBaseRequest(url, User.Identity.GetUserId());
-
             ViewData["url"] = url;
 
             var resultModel = new BaseRequestViewModel
