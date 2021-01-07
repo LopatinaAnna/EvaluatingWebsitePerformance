@@ -6,16 +6,18 @@ using EvaluatingWebsitePerformance.Data.Entities;
 using EvaluatingWebsitePerformance.Models;
 using System.Linq;
 using System.Net;
+using System.Collections.Generic;
+using System;
 
 namespace EvaluatingWebsitePerformance.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IService baseRequestService;
+        private readonly IService service;
 
-        public HomeController(IService baseRequestService)
+        public HomeController(IService service)
         {
-            this.baseRequestService = baseRequestService;
+            this.service = service;
         }
 
         [HttpGet]
@@ -26,7 +28,7 @@ namespace EvaluatingWebsitePerformance.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> MeasureResponseTime(string url)
+        public async Task<ActionResult> Results(string url)
         {
             try
             {
@@ -37,24 +39,94 @@ namespace EvaluatingWebsitePerformance.Controllers
                 return RedirectToAction("Index", new { status = "Invalid URL" });
             }
 
-            BaseRequest item = await baseRequestService.AddBaseRequest(url, User.Identity.GetUserId());
+            BaseRequest item = await service.AddBaseRequest(url, User.Identity.GetUserId());
             ViewData["url"] = url;
 
             var resultModel = new BaseRequestViewModel
             {
                 BaseRequestUrl = item.BaseRequestUrl,
-                Creation = item.Creation,
                 SitemapRequests = item.SitemapRequests
                 .OrderBy(c => c.MinResponseTime)
                 .ToList()
             };
-            return MeasureResponseTime(resultModel);
+            return Results(resultModel);
         }
 
         [HttpGet]
-        public ActionResult MeasureResponseTime(BaseRequestViewModel model)
+        public ActionResult Results(BaseRequestViewModel model)
         {
             return View(model);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult> HistoryResult(int? id)
+        {
+            var requestId = id.GetValueOrDefault();
+
+            if(requestId <= 0)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var baseRequest = await service.GetBaseRequests(requestId);
+
+            var userId = User.Identity.GetUserId();
+
+            if (baseRequest.UserId != userId)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var baseRequestViewModel = new BaseRequestViewModel
+            {
+                BaseRequestUrl = baseRequest.BaseRequestUrl,
+                SitemapRequests = baseRequest.SitemapRequests
+            };
+
+            return View(baseRequestViewModel);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult> HistoryList()
+        {
+            var userId = User.Identity.GetUserId();
+
+            var userRequests = await service.GetBaseRequestsByUser(userId);
+
+            var resultHistoryList = new List<HistoryViewModel>();
+
+            userRequests.ForEach(c => resultHistoryList.Add(new HistoryViewModel
+            {
+                BaseRequestUrl = c.BaseRequestUrl,
+                Creation = c.Creation
+            }));
+
+            return View(resultHistoryList);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ActionResult> GetHistory(string url, DateTime creation)
+        {
+            var userId = User.Identity.GetUserId();
+
+            if (url == null || creation == default)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var requestId = await service.GetBaseRequestId(userId, url, creation);
+
+            if (requestId > 0)
+            {
+                return RedirectToAction("HistoryResult", new { id = requestId });
+            }
+            else
+            {
+                return await HistoryList();
+            }
         }
     }
 }

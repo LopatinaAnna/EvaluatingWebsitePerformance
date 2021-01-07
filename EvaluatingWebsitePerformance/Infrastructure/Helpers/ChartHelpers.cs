@@ -22,10 +22,10 @@ namespace EvaluatingWebsitePerformance.Infrastructure.Helpers
                 .Select(c => c.ToString())
                 .ToArray();
 
-            var minValuesArr = sitemapRequests
+            var minValuesArr = orderRequests
                 .Select(c => c.MinResponseTime)
                 .ToArray();
-            var maxValuesArr = sitemapRequests
+            var maxValuesArr = orderRequests
                 .Select(c => c.MaxResponseTime)
                 .ToArray();
 

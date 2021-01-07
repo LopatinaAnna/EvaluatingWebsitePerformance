@@ -1,0 +1,46 @@
+﻿@model IEnumerable<EvaluatingWebsitePerformance.Models.HistoryViewModel>
+
+@{
+    ViewBag.Title = "History";
+    var i = 1;
+}
+
+<br />
+<h3 class="text-center">HISTORY</h3>
+<br />
+@if (!Model.Any())
+{
+    <h4>History is empty</h4>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Request URL</th>
+                    <th scope="col">Creation</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var request in Model)
+                {
+                    <tr>
+                        <th>@i</th>
+                        <td>@request.BaseRequestUrl</td>
+                        <td>@request.Creation</td>
+                        <td>
+                            @using (Html.BeginForm("GetHistory", "Home", new { url = request.BaseRequestUrl, creation = request.Creation }, FormMethod.Post))
+                            {
+                                <button type="submit" class="btn btn-link">Results</button>
+                            }
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    </div>
+}

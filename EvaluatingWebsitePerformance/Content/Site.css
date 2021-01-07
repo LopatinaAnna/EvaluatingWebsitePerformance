@@ -28,14 +28,17 @@ textarea {
     padding-top: 30px;
 }
 
-main{
-
+main {
     min-height: calc(100vh - 145px);
 }
 
-img{
+#myDiv {
+    overflow-x: hidden !important;
+    height:520px;
+}
+img {
     max-width: 1170px;
-    width:100%;
+    width: 100%;
 }
 
 #message {

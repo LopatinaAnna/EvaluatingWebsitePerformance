@@ -1,0 +1,18 @@
+﻿@model EvaluatingWebsitePerformance.Models.BaseRequestViewModel
+@{
+    ViewBag.Title = "Results";
+}
+
+@if (Model == null)
+{
+    <br />
+    <h3>Website not found</h3>
+
+    <div>
+        &rsaquo; @Html.ActionLink("Back to main page", "Index", "Home")
+    </div>
+}
+else
+{
+    @Html.Partial("Results", Model)
+}

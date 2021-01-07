@@ -27,7 +27,6 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         public async Task<BaseRequest> AddBaseRequest(string baseRequestUrl, string userId)
         {
-
             var item = new BaseRequest
             {
                 BaseRequestUrl = baseRequestUrl,
@@ -39,7 +38,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             await context.SaveChangesAsync();
 
-            var userRequests = await GetBaseRequestByUser(userId);
+            var userRequests = await GetBaseRequestsByUser(userId);
 
             var requestByUrl = userRequests.Where(c => c.BaseRequestUrl == baseRequestUrl).Reverse().FirstOrDefault();
 
@@ -50,7 +49,6 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             await context.SaveChangesAsync();
 
             return requestByUrl;
-
         }
 
         public async Task AddSitemapRequest(SitemapRequest sitemapRequest)
@@ -59,14 +57,27 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             await context.SaveChangesAsync();
         }
 
-        public async Task<List<BaseRequest>> GetBaseRequestByUser(string userId)
-            => await context.BaseRequests.Where(c => c.UserId == userId).ToListAsync();
+        public async Task<List<BaseRequest>> GetBaseRequestsByUser(string userId)
+            => await context.BaseRequests
+            .Where(c => c.UserId == userId)
+            .ToListAsync();
 
-        public async Task<BaseRequest> GetBaseRequest(string userId, string baseRequestUrl)
-            => await context.BaseRequests.Where(c => c.UserId == userId && c.BaseRequestUrl == baseRequestUrl).Reverse().FirstOrDefaultAsync();
+        public async Task<int> GetBaseRequestId(string userId, string baseRequestUrl, DateTime creation)
+        {
+           var item = await context.BaseRequests
+              .FirstOrDefaultAsync(c => c.UserId == userId && c.BaseRequestUrl == baseRequestUrl && c.Creation.Second == creation.Second);
 
+            return item.Id;
+        }
         public async Task<SitemapRequest> GetSitemapRequestByBaseRequestId(int baseRequestId)
-            => await context.SitemapRequests.FirstOrDefaultAsync(c => c.BaseRequestId == baseRequestId);
+            => await context.SitemapRequests
+            .FirstOrDefaultAsync(c => c.BaseRequestId == baseRequestId);
+
+
+        public async Task<BaseRequest> GetBaseRequests(int id)
+         => await context.BaseRequests
+            .Include(c =>c.SitemapRequests)
+            .FirstOrDefaultAsync(c => c.Id == id);
 
         private async Task<List<SitemapRequest>> GetSitemapRequests(string baseRequestUrl, int baseRequestId)
         {
@@ -76,7 +87,11 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             foreach (var item in sitemapUrls)
             {
-                var sitemapRequest = new SitemapRequest { SitemapRequestUrl = item, BaseRequestId = baseRequestId };
+                var sitemapRequest = new SitemapRequest 
+                { 
+                    SitemapRequestUrl = item, 
+                    BaseRequestId = baseRequestId 
+                };
 
                 for (int i = 0; i < ATTEMPT_COUNT; i++)
                 {
@@ -94,7 +109,6 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
                     sitemapRequests.Add(sitemapRequest);
                 }
             }
-
             return sitemapRequests;
         }
 
@@ -116,7 +130,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             var htmlDocument = await new HtmlWeb().LoadFromWebAsync(baseRequestUrl);
 
-            foreach (HtmlNode htmlNode in htmlDocument.DocumentNode.SelectNodes("//a[@href]"))
+            foreach (var htmlNode in htmlDocument.DocumentNode.SelectNodes("//a[@href]"))
             {
                 string href = htmlNode.GetAttributeValue("href", string.Empty);
 
@@ -125,7 +139,6 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
                 if (urls.Count == SITEMAP_URLS_COUNT) break;
             }
-
             return urls;
         }
 

@@ -4,7 +4,10 @@
     ViewBag.Title = "Login";
 }
 
-<h2>@ViewBag.Title.</h2>
+<h2>@ViewBag.Title</h2>
+<p>
+    @Html.ActionLink("No account? Register", "Register")
+</p>
 <div class="row">
     <div class="col-md-8">
         <section id="loginForm">
@@ -40,9 +43,7 @@
                         <input type="submit" value="Login" class="btn btn-default" />
                     </div>
                 </div>
-                <p>
-                    @Html.ActionLink("No account? Register", "Register")
-                </p>
+                <br />
             }
         </section>
     </div>

@@ -2,7 +2,7 @@
     ViewBag.Title = "Home Page";
 }
 
-@using (Html.BeginForm("MeasureResponseTime", "Home", FormMethod.Post, new { @class = "input-url" }))
+@using (Html.BeginForm("Results", "Home", FormMethod.Post, new { @class = "input-url" }))
 {
     <div class="form-group">
         <label for="inputUrl" class="form-label">Enter url</label>
@@ -15,16 +15,15 @@
 
 <h5 id="message">@ViewData["status-message"]</h5>
 
-<script>
-    function modifyMessage(content) {
-        document.getElementById("message").innerHTML = content;
-    }
-
-    document.getElementById("submit-button").addEventListener("click", function ()
-    {
-        if (document.getElementById("message").innerHTML.length == 0)
-            modifyMessage("Empty input")
-        else
-            modifyMessage("Request in progress...")
-    }, false);
-</script>
+@if (!User.Identity.IsAuthenticated)
+{
+    <div>
+        &rsaquo; @Html.ActionLink("Login to save results and view history", "Login", "Account")
+    </div>
+}
+else
+{
+    <div>
+        &rsaquo; @Html.ActionLink("View history", "HistoryList", "Home")
+    </div>
+}
