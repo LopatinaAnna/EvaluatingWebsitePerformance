@@ -7,6 +7,6 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Interfaces
     {
         Task<BaseRequest> AddBaseRequest(string baseRequestUrl, string userId);
 
-        BaseRequest GetBaseRequest(string userId, string baseRequestUrl);
+        Task<BaseRequest> GetBaseRequest(string userId, string baseRequestUrl);
     }
 }

@@ -186,6 +186,7 @@
     <Compile Include="BusinessLogic\Interfaces\IService.cs" />
     <Compile Include="BusinessLogic\Services\Service.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HistoryController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Data\ApplicationDbContext.cs" />
@@ -252,6 +253,10 @@
     <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Home\MeasureResponseTime.cshtml" />
+    <Content Include="Views\Error\HTTP404.cshtml" />
+    <Content Include="Views\Error\HTTP400.cshtml" />
+    <Content Include="Views\Error\HTTP413.cshtml" />
+    <Content Include="Views\Error\HTTP500.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\History\" />

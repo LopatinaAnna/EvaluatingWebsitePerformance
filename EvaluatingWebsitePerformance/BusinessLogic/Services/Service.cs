@@ -18,7 +18,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         private const int ATTEMPT_COUNT = 3;
 
-        private const int SITEMAP_URLS_COUNT = 15;
+        private const int SITEMAP_URLS_COUNT = 10;
 
         public Service(ApplicationDbContext _context)
         {
@@ -43,7 +43,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             var requestByUrl = userRequests.Where(c => c.BaseRequestUrl == baseRequestUrl).Reverse().FirstOrDefault();
 
-            var sitemapsList = GetSitemapRequests(baseRequestUrl, requestByUrl.Id);
+            var sitemapsList = await GetSitemapRequests(baseRequestUrl, requestByUrl.Id);
 
             requestByUrl.SitemapRequests = sitemapsList;
 
@@ -53,24 +53,24 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         }
 
-        public void AddSitemapRequest(SitemapRequest sitemapRequest)
+        public async Task AddSitemapRequest(SitemapRequest sitemapRequest)
         {
             context.SitemapRequests.Add(sitemapRequest);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
         public async Task<List<BaseRequest>> GetBaseRequestByUser(string userId)
             => await context.BaseRequests.Where(c => c.UserId == userId).ToListAsync();
 
-        public BaseRequest GetBaseRequest(string userId, string baseRequestUrl)
-            =>  context.BaseRequests.Where(c => c.UserId == userId && c.BaseRequestUrl == baseRequestUrl).Reverse().FirstOrDefault();
+        public async Task<BaseRequest> GetBaseRequest(string userId, string baseRequestUrl)
+            => await context.BaseRequests.Where(c => c.UserId == userId && c.BaseRequestUrl == baseRequestUrl).Reverse().FirstOrDefaultAsync();
 
         public async Task<SitemapRequest> GetSitemapRequestByBaseRequestId(int baseRequestId)
             => await context.SitemapRequests.FirstOrDefaultAsync(c => c.BaseRequestId == baseRequestId);
 
-        private List<SitemapRequest> GetSitemapRequests(string baseRequestUrl, int baseRequestId)
+        private async Task<List<SitemapRequest>> GetSitemapRequests(string baseRequestUrl, int baseRequestId)
         {
-            var sitemapUrls = GetSitemapUrls(baseRequestUrl);
+            var sitemapUrls = await GetSitemapUrls(baseRequestUrl);
 
             var sitemapRequests = new List<SitemapRequest>();
 
@@ -80,22 +80,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
                 for (int i = 0; i < ATTEMPT_COUNT; i++)
                 {
-                    WebRequest request = WebRequest.Create(item);
-                    Stopwatch timer = new Stopwatch();
-
-                    timer.Start();
-                    try
-                    {
-                        request.GetResponse();
-                    }
-                    catch
-                    {
-                        break;
-                    }
-
-                    timer.Stop();
-
-                    double time = Math.Round(timer.Elapsed.TotalMilliseconds);
+                    double time = await GetRequestTime(item);
 
                     sitemapRequest.ResponseTimes.Add(time);
                 }
@@ -105,7 +90,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
                     sitemapRequest.MinResponseTime = sitemapRequest.ResponseTimes.Min();
                     sitemapRequest.MaxResponseTime = sitemapRequest.ResponseTimes.Max();
 
-                    AddSitemapRequest(sitemapRequest);
+                    await AddSitemapRequest(sitemapRequest);
                     sitemapRequests.Add(sitemapRequest);
                 }
             }
@@ -113,17 +98,29 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             return sitemapRequests;
         }
 
-        private List<string> GetSitemapUrls(string baseRequestUrl)
+        private async Task<double> GetRequestTime(string item)
         {
-            List<string> urls = new List<string>{ baseRequestUrl };
+            WebRequest request = WebRequest.Create(item);
+            Stopwatch timer = new Stopwatch();
 
-            var htmlDocument = new HtmlWeb().Load(baseRequestUrl);
+            timer.Start();
+            await request.GetResponseAsync();
+            timer.Stop();
+
+            return Math.Round(timer.Elapsed.TotalMilliseconds);
+        }
+
+        private async Task<List<string>> GetSitemapUrls(string baseRequestUrl)
+        {
+            List<string> urls = new List<string> { baseRequestUrl };
+
+            var htmlDocument = await new HtmlWeb().LoadFromWebAsync(baseRequestUrl);
 
             foreach (HtmlNode htmlNode in htmlDocument.DocumentNode.SelectNodes("//a[@href]"))
             {
                 string href = htmlNode.GetAttributeValue("href", string.Empty);
 
-                if(href.StartsWith(baseRequestUrl) && !urls.Contains(href))
+                if (href.StartsWith(baseRequestUrl) && !urls.Contains(href))
                     urls.Add(href);
 
                 if (urls.Count == SITEMAP_URLS_COUNT) break;

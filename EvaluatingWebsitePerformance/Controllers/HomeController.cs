@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using EvaluatingWebsitePerformance.Data.Entities;
 using EvaluatingWebsitePerformance.Models;
 using System.Linq;
-using HtmlAgilityPack;
+using System.Net;
 
 namespace EvaluatingWebsitePerformance.Controllers
 {
@@ -19,8 +19,9 @@ namespace EvaluatingWebsitePerformance.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index()
+        public ActionResult Index(string status)
         {
+            ViewData["status-message"] = status;
             return View();
         }
 
@@ -29,12 +30,11 @@ namespace EvaluatingWebsitePerformance.Controllers
         {
             try
             {
-                new System.Uri(url);
-                new HtmlWeb().Load(url);
+                await WebRequest.Create(url).GetResponseAsync();
             }
             catch
             {
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { status = "Invalid URL" });
             }
 
             BaseRequest item = await baseRequestService.AddBaseRequest(url, User.Identity.GetUserId());
@@ -48,7 +48,6 @@ namespace EvaluatingWebsitePerformance.Controllers
                 .OrderBy(c => c.MinResponseTime)
                 .ToList()
             };
-
             return MeasureResponseTime(resultModel);
         }
 
