@@ -39,18 +39,10 @@ namespace EvaluatingWebsitePerformance.Controllers
         [HttpPost]
         public async Task<ActionResult> Results(string url)
         {
-            if (string.IsNullOrEmpty(url) || url.Length > 1000)
+            var isValid = ValidateUrl(url);
+            if (!isValid.Item1)
             {
-                return RedirectToAction("Index", new { status = "Incorrect input" });
-            }
-
-            try
-            {
-                await WebRequest.Create(url).GetResponseAsync();
-            }
-            catch
-            {
-                return RedirectToAction("Index", new { status = "No response" });
+                return RedirectToAction("Index", new { status = isValid.Item2 });
             }
 
             BaseRequest item;
@@ -60,10 +52,7 @@ namespace EvaluatingWebsitePerformance.Controllers
             }
             catch (ValidationException exception)
             {
-                return RedirectToAction("Index", new
-                {
-                    status = exception.Message
-                });
+                return RedirectToAction("Index", new { status = exception.Message });
             }
 
             var resultModel = new BaseRequestViewModel
@@ -73,6 +62,7 @@ namespace EvaluatingWebsitePerformance.Controllers
                 .OrderBy(c => c.MinResponseTime)
                 .ToList()
             };
+
             return Results(resultModel);
         }
 
@@ -87,11 +77,9 @@ namespace EvaluatingWebsitePerformance.Controllers
                 return RedirectToAction("Index");
             }
 
-            var baseRequest = await service.GetBaseRequests(requestId);
+            var baseRequest = await service.GetBaseRequest(requestId);
 
-            var userId = User.Identity.GetUserId();
-
-            if (baseRequest.UserId != userId)
+            if (baseRequest.UserId != User.Identity.GetUserId())
             {
                 return RedirectToAction("Index");
             }
@@ -109,9 +97,7 @@ namespace EvaluatingWebsitePerformance.Controllers
         [HttpGet]
         public async Task<ActionResult> HistoryList()
         {
-            var userId = User.Identity.GetUserId();
-
-            var userRequests = await service.GetBaseRequestsByUser(userId);
+            var userRequests = await service.GetBaseRequestsByUser(User.Identity.GetUserId());
 
             var resultHistoryList = new List<HistoryViewModel>();
 
@@ -128,12 +114,12 @@ namespace EvaluatingWebsitePerformance.Controllers
         [HttpPost]
         public async Task<ActionResult> GetHistory(string url, DateTime creation)
         {
-            var userId = User.Identity.GetUserId();
-
             if (url == null || creation == default)
             {
                 return RedirectToAction("Index");
             }
+
+            var userId = User.Identity.GetUserId();
 
             var requestId = await service.GetBaseRequestId(userId, url, creation);
 
@@ -143,7 +129,7 @@ namespace EvaluatingWebsitePerformance.Controllers
             }
             else
             {
-                return await HistoryList();
+                return RedirectToAction("HistoryList");
             }
         }
 
@@ -151,6 +137,11 @@ namespace EvaluatingWebsitePerformance.Controllers
         [HttpPost]
         public async Task<ActionResult> RemoveHistoryResult(string baseRequestUrl, DateTime creation)
         {
+            if (baseRequestUrl == null || creation == default)
+            {
+                return RedirectToAction("Index");
+            }
+
             var userId = User.Identity.GetUserId();
 
             await service.DeleteBaseRequest(userId, baseRequestUrl, creation);
@@ -167,6 +158,34 @@ namespace EvaluatingWebsitePerformance.Controllers
             await service.DeleteAllBaseRequest(userId);
 
             return RedirectToAction("HistoryList");
+        }
+
+        private (bool, string) ValidateUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url) || url.Length > 1000)
+            {
+                return (false, "Incorrect input");
+            }
+            
+            try
+            {
+                new Uri(url);
+            }
+            catch
+            {
+                return (false, "Incorrect url");
+            }
+
+            try
+            {
+                WebRequest.Create(url).GetResponse();
+            }
+            catch
+            {
+                return (false, "No response");
+            }
+
+            return (true, "Url is correct");
         }
     }
 }

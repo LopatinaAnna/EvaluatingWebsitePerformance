@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace EvaluatingWebsitePerformance.BusinessLogic.Interfaces
 {
-    public interface IService
+    public interface IService : IDisposable
     {
         Task<BaseRequest> AddBaseRequest(string baseRequestUrl, string userId);
 
@@ -13,7 +13,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Interfaces
 
         Task<List<BaseRequest>> GetBaseRequestsByUser(string userId);
 
-        Task<BaseRequest> GetBaseRequests(int id);
+        Task<BaseRequest> GetBaseRequest(int id);
 
         Task DeleteAllBaseRequest(string userId);
 

@@ -28,6 +28,8 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         public async Task<BaseRequest> AddBaseRequest(string baseRequestUrl, string userId)
         {
+            // Init base request
+
             DateTime creation = DateTime.Now;
             var item = new BaseRequest
             {
@@ -39,6 +41,8 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             context.BaseRequests.Add(item);
 
             await context.SaveChangesAsync();
+
+            // Add to base request list of sitemap requests
 
             var userRequests = await GetBaseRequestsByUser(userId);
 
@@ -109,10 +113,15 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
                && c.BaseRequestUrl == baseRequestUrl
                && c.Creation.Second == creation.Second);
 
+            if(item == null || item == default)
+            {
+                return default;
+            }
+
             return item.Id;
         }
 
-        public async Task<BaseRequest> GetBaseRequests(int id)
+        public async Task<BaseRequest> GetBaseRequest(int id)
          => await context.BaseRequests
             .Include(c => c.SitemapRequests)
             .FirstOrDefaultAsync(c => c.Id == id);
