@@ -34,8 +34,9 @@ main {
 
 #myDiv {
     overflow-x: hidden !important;
-    height:520px;
+    height: 520px;
 }
+
 img {
     max-width: 1170px;
     width: 100%;
@@ -51,13 +52,23 @@ img {
 }
 
 .navbar-inverse, .navbar-toggle {
-    background-color: #313131;
+    background-color: #213445;
 }
 
-.table > thead > tr > th, 
+.table > thead > tr > th,
 .table > tbody > tr > th,
-.table > thead > tr > td, 
-.table > tbody > tr > td
-{
+.table > thead > tr > td,
+.table > tbody > tr > td {
     vertical-align: middle;
+}
+
+.websiteUrl {
+    width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+td{
+    max-width: 400px;
 }

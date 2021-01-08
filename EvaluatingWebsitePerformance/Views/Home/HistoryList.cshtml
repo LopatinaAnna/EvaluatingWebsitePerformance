@@ -23,7 +23,7 @@ else
                     <th scope="col">Creation</th>
                     <th scope="col"></th>
                     <th scope="col">
-                        @using (Html.BeginForm("RemoveAllHistory", "Home", FormMethod.Post, 
+                        @using (Html.BeginForm("RemoveAllHistory", "Home", FormMethod.Post,
                             new { @onsubmit = "confirm_submit(this, 'Are you sure you want to remove all?');return false;" }))
                         {
                             <button type="submit" class="btn btn-link">Remove All</button>
@@ -39,7 +39,7 @@ else
                         <td>@request.BaseRequestUrl</td>
                         <td>@request.Creation</td>
                         <td>
-                            @using (Html.BeginForm("GetHistory", "Home", 
+                            @using (Html.BeginForm("GetHistory", "Home",
                                 new { url = request.BaseRequestUrl, creation = request.Creation }, FormMethod.Post))
                             {
                                 <button type="submit" class="btn btn-link">Results</button>

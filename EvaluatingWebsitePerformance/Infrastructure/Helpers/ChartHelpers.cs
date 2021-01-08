@@ -1,11 +1,11 @@
-﻿using System;
+﻿using EvaluatingWebsitePerformance.Data.Entities;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using EvaluatingWebsitePerformance.Data.Entities;
-using System.Web.Mvc;
 using System.Drawing;
-using System.Web.UI.DataVisualization.Charting;
 using System.IO;
+using System.Linq;
+using System.Web.Mvc;
+using System.Web.UI.DataVisualization.Charting;
 
 namespace EvaluatingWebsitePerformance.Infrastructure.Helpers
 {
@@ -29,17 +29,20 @@ namespace EvaluatingWebsitePerformance.Infrastructure.Helpers
                 .Select(c => c.MaxResponseTime)
                 .ToArray();
 
-            var chart = new Chart();
-            chart.Width = 1700;
-            chart.Height = 450;
-            chart.BackColor = Color.White;
-            chart.BorderlineDashStyle = ChartDashStyle.NotSet;
-            chart.BackSecondaryColor = Color.White;
-            chart.BackGradientStyle = GradientStyle.TopBottom;
-            chart.BorderlineWidth = 0;
-            chart.Palette = ChartColorPalette.SemiTransparent;
-            chart.BorderlineColor = Color.FromArgb(26, 59, 105);
-            chart.RenderType = RenderType.BinaryStreaming;
+            var chart = new Chart
+            {
+                Width = 1700,
+                Height = 450,
+                BackColor = Color.White,
+                BorderlineDashStyle = ChartDashStyle.NotSet,
+                BackSecondaryColor = Color.White,
+                BackGradientStyle = GradientStyle.TopBottom,
+                BorderlineWidth = 0,
+                Palette = ChartColorPalette.SemiTransparent,
+                BorderlineColor = Color.FromArgb(26, 59, 105),
+                RenderType = RenderType.BinaryStreaming
+            };
+
             chart.BorderSkin.SkinStyle = BorderSkinStyle.None;
             chart.AntiAliasing = AntiAliasingStyles.All;
             chart.TextAntiAliasingQuality = TextAntiAliasingQuality.Normal;
@@ -48,6 +51,7 @@ namespace EvaluatingWebsitePerformance.Infrastructure.Helpers
             chart.Series.Add(ChartSettings.CreateSeries(namesArr, minValuesArr, "Min response", SeriesChartType.Column, Color.LightGreen));
             chart.Series.Add(ChartSettings.CreateSeries(namesArr, maxValuesArr, "Max response", SeriesChartType.Column, Color.DarkGray));
             chart.ChartAreas.Add(ChartSettings.CreateChartArea());
+
             var ms = new MemoryStream();
             chart.SaveImage(ms);
 

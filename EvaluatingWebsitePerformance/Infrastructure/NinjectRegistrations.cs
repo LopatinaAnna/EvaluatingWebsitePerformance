@@ -11,5 +11,4 @@ namespace EvaluatingWebsitePerformance.Infrastructure
             Bind<IService>().To<Service>();
         }
     }
-
 }

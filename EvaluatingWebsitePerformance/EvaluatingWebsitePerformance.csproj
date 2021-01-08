@@ -196,6 +196,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\Filters\ActionException.cs" />
     <Compile Include="Infrastructure\Helpers\ChartHelpers.cs" />
     <Compile Include="Infrastructure\Helpers\ChartSettings.cs" />
     <Compile Include="Infrastructure\NinjectRegistrations.cs" />
@@ -216,6 +217,11 @@
     <Content Include="App_Data\EvaluatingWebsitePerformance11_log.ldf">
       <DependentUpon>EvaluatingWebsitePerformance11.mdf</DependentUpon>
     </Content>
+    <Content Include="App_Data\EvaluatingWebsitePerformanceDB.mdf" />
+    <Content Include="App_Data\EvaluatingWebsitePerformanceDB_log.ldf">
+      <DependentUpon>EvaluatingWebsitePerformanceDB.mdf</DependentUpon>
+    </Content>
+    <Content Include="bin\roslyn\csc.exe" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />

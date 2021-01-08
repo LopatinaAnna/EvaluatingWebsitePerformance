@@ -18,5 +18,4 @@ namespace EvaluatingWebsitePerformance.Data
         public virtual DbSet<BaseRequest> BaseRequests { get; set; }
         public virtual DbSet<SitemapRequest> SitemapRequests { get; set; }
     }
-
 }

@@ -1,17 +1,19 @@
-﻿using System.Web.Mvc;
-using EvaluatingWebsitePerformance.BusinessLogic.Interfaces;
-using Microsoft.AspNet.Identity;
-using System.Threading.Tasks;
+﻿using EvaluatingWebsitePerformance.BusinessLogic.Interfaces;
 using EvaluatingWebsitePerformance.Data.Entities;
+using EvaluatingWebsitePerformance.Infrastructure;
+using EvaluatingWebsitePerformance.Infrastructure.Filters;
 using EvaluatingWebsitePerformance.Models;
+using Microsoft.AspNet.Identity;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Collections.Generic;
-using System;
-using EvaluatingWebsitePerformance.Infrastructure;
+using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace EvaluatingWebsitePerformance.Controllers
 {
+    [ActionException]
     public class HomeController : Controller
     {
         private readonly IService service;
@@ -28,16 +30,27 @@ namespace EvaluatingWebsitePerformance.Controllers
             return View();
         }
 
+        [HttpGet]
+        public ActionResult Results(BaseRequestViewModel model)
+        {
+            return View(model);
+        }
+
         [HttpPost]
         public async Task<ActionResult> Results(string url)
         {
+            if (string.IsNullOrEmpty(url) || url.Length > 1000)
+            {
+                return RedirectToAction("Index", new { status = "Incorrect input" });
+            }
+
             try
             {
                 await WebRequest.Create(url).GetResponseAsync();
             }
             catch
             {
-                return RedirectToAction("Index", new { status = "Invalid URL" });
+                return RedirectToAction("Index", new { status = "No response" });
             }
 
             BaseRequest item;
@@ -47,10 +60,11 @@ namespace EvaluatingWebsitePerformance.Controllers
             }
             catch (ValidationException exception)
             {
-                return RedirectToAction("Index", new { status = exception.Message });
+                return RedirectToAction("Index", new
+                {
+                    status = exception.Message
+                });
             }
-
-            ViewData["url"] = url;
 
             var resultModel = new BaseRequestViewModel
             {
@@ -62,19 +76,13 @@ namespace EvaluatingWebsitePerformance.Controllers
             return Results(resultModel);
         }
 
-        [HttpGet]
-        public ActionResult Results(BaseRequestViewModel model)
-        {
-            return View(model);
-        }
-
         [Authorize]
         [HttpGet]
         public async Task<ActionResult> HistoryResult(int? id)
         {
             var requestId = id.GetValueOrDefault();
 
-            if(requestId <= 0)
+            if (requestId <= 0)
             {
                 return RedirectToAction("Index");
             }

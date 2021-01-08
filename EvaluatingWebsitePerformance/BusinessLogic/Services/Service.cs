@@ -28,10 +28,11 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         public async Task<BaseRequest> AddBaseRequest(string baseRequestUrl, string userId)
         {
+            DateTime creation = DateTime.Now;
             var item = new BaseRequest
             {
                 BaseRequestUrl = baseRequestUrl,
-                Creation = DateTime.Now,
+                Creation = creation,
                 UserId = userId
             };
 
@@ -41,27 +42,27 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             var userRequests = await GetBaseRequestsByUser(userId);
 
-            var requestByUrl = userRequests
-                .Where(c => c.BaseRequestUrl == baseRequestUrl)
-                .Reverse()
-                .FirstOrDefault();
+            var baseRequest = userRequests
+                .FirstOrDefault(c => c.BaseRequestUrl == baseRequestUrl
+                && c.Creation.Second == creation.Second);
 
             List<SitemapRequest> sitemapsList;
 
             try
             {
-                sitemapsList = await GetSitemapRequests(baseRequestUrl, requestByUrl.Id);
+                sitemapsList = await GetSitemapRequests(baseRequestUrl, baseRequest.Id);
             }
             catch (ValidationException exception)
             {
+                await DeleteBaseRequest(baseRequest.UserId, baseRequest.BaseRequestUrl, baseRequest.Creation);
                 throw exception;
             }
 
-            requestByUrl.SitemapRequests = sitemapsList;
+            baseRequest.SitemapRequests = sitemapsList;
 
             await context.SaveChangesAsync();
 
-            return requestByUrl;
+            return baseRequest;
         }
 
         public async Task AddSitemapRequest(SitemapRequest sitemapRequest)
@@ -73,8 +74,8 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
         public async Task DeleteBaseRequest(string userId, string baseRequestUrl, DateTime creation)
         {
             var item = await context.BaseRequests
-              .FirstOrDefaultAsync(c => c.UserId == userId 
-              && c.BaseRequestUrl == baseRequestUrl 
+              .FirstOrDefaultAsync(c => c.UserId == userId
+              && c.BaseRequestUrl == baseRequestUrl
               && c.Creation.Second == creation.Second);
 
             if (item != null)
@@ -103,21 +104,17 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         public async Task<int> GetBaseRequestId(string userId, string baseRequestUrl, DateTime creation)
         {
-           var item = await context.BaseRequests
-              .FirstOrDefaultAsync(c => c.UserId == userId 
-              && c.BaseRequestUrl == baseRequestUrl 
-              && c.Creation.Second == creation.Second);
+            var item = await context.BaseRequests
+               .FirstOrDefaultAsync(c => c.UserId == userId
+               && c.BaseRequestUrl == baseRequestUrl
+               && c.Creation.Second == creation.Second);
 
             return item.Id;
         }
-        public async Task<SitemapRequest> GetSitemapRequestByBaseRequestId(int baseRequestId)
-            => await context.SitemapRequests
-            .FirstOrDefaultAsync(c => c.BaseRequestId == baseRequestId);
-
 
         public async Task<BaseRequest> GetBaseRequests(int id)
          => await context.BaseRequests
-            .Include(c =>c.SitemapRequests)
+            .Include(c => c.SitemapRequests)
             .FirstOrDefaultAsync(c => c.Id == id);
 
         private async Task<List<SitemapRequest>> GetSitemapRequests(string baseRequestUrl, int baseRequestId)
@@ -136,15 +133,18 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             foreach (var item in sitemapUrls)
             {
-                var sitemapRequest = new SitemapRequest 
-                { 
-                    SitemapRequestUrl = item, 
-                    BaseRequestId = baseRequestId 
+                var sitemapRequest = new SitemapRequest
+                {
+                    SitemapRequestUrl = item,
+                    BaseRequestId = baseRequestId
                 };
 
                 for (int i = 0; i < ATTEMPT_COUNT; i++)
                 {
                     double time = await GetRequestTime(item);
+
+                    if (time == 0)
+                        break;
 
                     sitemapRequest.ResponseTimes.Add(time);
                 }
@@ -167,7 +167,14 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             Stopwatch timer = new Stopwatch();
 
             timer.Start();
-            await request.GetResponseAsync();
+            try
+            {
+                await request.GetResponseAsync();
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
             timer.Stop();
 
             return Math.Round(timer.Elapsed.TotalMilliseconds);
@@ -177,32 +184,44 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
         {
             List<string> urls = new List<string> { baseRequestUrl };
 
+            var url = new Uri(baseRequestUrl);
+
+            var stringUrl = string.Concat(url.Scheme, "://", url.Host);
+
             HtmlNodeCollection nodes;
             try
             {
-                var htmlDocument = await new HtmlWeb().LoadFromWebAsync(baseRequestUrl);
+                var htmlDocument = await new HtmlWeb().LoadFromWebAsync(stringUrl);
                 nodes = htmlDocument.DocumentNode.SelectNodes("//a[@href]");
             }
             catch (Exception)
             {
-                throw new ValidationException("Invalid html document");
+                throw new ValidationException("Invalid resource");
             }
 
-            if(nodes == null || nodes.Count == 0)
+            if (nodes == null || nodes.Count == 0)
             {
-                throw new ValidationException("Invalid html document");
+                throw new ValidationException("Invalid resource");
             }
 
             foreach (var htmlNode in nodes)
             {
                 string href = htmlNode.GetAttributeValue("href", string.Empty);
 
-                if (href.StartsWith(baseRequestUrl) && !urls.Contains(href))
+                if (href.StartsWith("/") && !href.StartsWith("/#"))
+                {
                     urls.Add(href);
-
-                if (urls.Count == SITEMAP_URLS_COUNT) break;
+                }
+                else if (href.StartsWith(stringUrl))
+                {
+                    urls.Add(href);
+                }
             }
-            return urls;
+            return urls
+                .Select(c => c.StartsWith("/") ? stringUrl + c : c)
+                .Distinct()
+                .Take(SITEMAP_URLS_COUNT)
+                .ToList();
         }
 
         private bool disposed = false;

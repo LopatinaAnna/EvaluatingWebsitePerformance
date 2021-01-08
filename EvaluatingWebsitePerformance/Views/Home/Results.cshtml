@@ -60,9 +60,10 @@ else
             <tbody>
                 @foreach (var sitemapUrl in Model.SitemapRequests)
                 {
+                    var url = sitemapUrl.SitemapRequestUrl;
                     <tr>
                         <th>@i</th>
-                        <td><a href="@sitemapUrl.SitemapRequestUrl">@sitemapUrl.SitemapRequestUrl</a></td>
+                        <td class="websiteUrl" title="@url"><a href="@url">@url</a></td>
                         <td>@sitemapUrl.MinResponseTime</td>
                         <td>@sitemapUrl.MaxResponseTime</td>
                     </tr>

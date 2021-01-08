@@ -7,35 +7,42 @@ namespace EvaluatingWebsitePerformance.Infrastructure.Helpers
     {
         public static Title CreateTitle()
         {
-            Title title = new Title();
-            title.Text = "";
-            title.ShadowColor = Color.Black;
-            title.Font = new Font("Arial", 16F, FontStyle.Bold);
-            title.ShadowOffset = 0;
-            title.ForeColor = Color.Black;
+            Title title = new Title
+            {
+                Text = "",
+                ShadowColor = Color.Black,
+                Font = new Font("Arial", 16F, FontStyle.Bold),
+                ShadowOffset = 0,
+                ForeColor = Color.Black
+            };
 
             return title;
         }
 
         public static Series CreateSeries(string[] names, double[] values, string seriesName, SeriesChartType chartType, Color color)
         {
-            var seriesDetail = new Series();
-            seriesDetail.Name = seriesName;
-            seriesDetail.IsValueShownAsLabel = false;
-            seriesDetail.Color = color;
-            seriesDetail.ChartType = chartType;
-            seriesDetail.BorderWidth = 1;
-            seriesDetail.Font = new Font(new FontFamily("Arial"), 16);
+            var seriesDetail = new Series
+            {
+                Name = seriesName,
+                IsValueShownAsLabel = false,
+                Color = color,
+                ChartType = chartType,
+                BorderWidth = 1,
+                Font = new Font(new FontFamily("Arial"), 16)
+            };
+
             seriesDetail["DrawingStyle"] = "Default";
             seriesDetail["PieDrawingStyle"] = "Default";
             DataPoint point;
 
             for (int i = 0; i < names.Length; i++)
             {
-                point = new DataPoint();
-                point.AxisLabel = names[i];
-                point.YValues = new double[] { values[i] };
-                point.Font = new Font(new FontFamily("Arial"), 16);
+                point = new DataPoint
+                {
+                    AxisLabel = names[i],
+                    YValues = new double[] { values[i] },
+                    Font = new Font(new FontFamily("Arial"), 16)
+                };
                 seriesDetail.Points.Add(point);
             }
 
@@ -44,20 +51,25 @@ namespace EvaluatingWebsitePerformance.Infrastructure.Helpers
 
         public static Legend CreateLegend()
         {
-            var legend = new Legend();
-            legend.Docking = Docking.Bottom;
-            legend.Alignment = StringAlignment.Center;
-            legend.BackColor = Color.Transparent;
-            legend.Font = new Font(new FontFamily("Arial"), 12);
-            legend.LegendStyle = LegendStyle.Row;
+            var legend = new Legend
+            {
+                Docking = Docking.Bottom,
+                Alignment = StringAlignment.Center,
+                BackColor = Color.Transparent,
+                Font = new Font(new FontFamily("Arial"), 12),
+                LegendStyle = LegendStyle.Row
+            };
             return legend;
         }
 
         public static ChartArea CreateChartArea()
         {
-            var chartArea = new ChartArea();
-            chartArea.Name = "";
-            chartArea.BackColor = Color.Transparent;
+            var chartArea = new ChartArea
+            {
+                Name = "",
+                BackColor = Color.Transparent
+            };
+
             chartArea.AxisX.IsLabelAutoFit = true;
             chartArea.AxisY.IsLabelAutoFit = false;
             chartArea.AxisX.MajorTickMark.Enabled = false;
@@ -67,10 +79,11 @@ namespace EvaluatingWebsitePerformance.Infrastructure.Helpers
             chartArea.AxisY.LineColor = Color.Transparent;
             chartArea.AxisX.LineColor = Color.FromArgb(64, 64, 64, 64);
             chartArea.AxisY.MajorGrid.LineColor = Color.FromArgb(64, 64, 64, 64);
-            chartArea.AxisX.MajorGrid.LineColor = Color.Transparent; 
+            chartArea.AxisX.MajorGrid.LineColor = Color.Transparent;
             chartArea.AxisX.Interval = 1;
             chartArea.AxisY.Title = "Response time, ms";
             chartArea.AxisY.TitleFont = new Font("Arial,sans-serif", 12F, FontStyle.Bold);
+
             return chartArea;
         }
     }
