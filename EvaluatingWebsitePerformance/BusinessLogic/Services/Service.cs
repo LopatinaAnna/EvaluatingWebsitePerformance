@@ -1,6 +1,7 @@
 ﻿using EvaluatingWebsitePerformance.BusinessLogic.Interfaces;
 using EvaluatingWebsitePerformance.Data;
 using EvaluatingWebsitePerformance.Data.Entities;
+using EvaluatingWebsitePerformance.Infrastructure;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
@@ -40,9 +41,21 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             var userRequests = await GetBaseRequestsByUser(userId);
 
-            var requestByUrl = userRequests.Where(c => c.BaseRequestUrl == baseRequestUrl).Reverse().FirstOrDefault();
+            var requestByUrl = userRequests
+                .Where(c => c.BaseRequestUrl == baseRequestUrl)
+                .Reverse()
+                .FirstOrDefault();
 
-            var sitemapsList = await GetSitemapRequests(baseRequestUrl, requestByUrl.Id);
+            List<SitemapRequest> sitemapsList;
+
+            try
+            {
+                sitemapsList = await GetSitemapRequests(baseRequestUrl, requestByUrl.Id);
+            }
+            catch (ValidationException exception)
+            {
+                throw exception;
+            }
 
             requestByUrl.SitemapRequests = sitemapsList;
 
@@ -57,6 +70,32 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             await context.SaveChangesAsync();
         }
 
+        public async Task DeleteBaseRequest(string userId, string baseRequestUrl, DateTime creation)
+        {
+            var item = await context.BaseRequests
+              .FirstOrDefaultAsync(c => c.UserId == userId 
+              && c.BaseRequestUrl == baseRequestUrl 
+              && c.Creation.Second == creation.Second);
+
+            if (item != null)
+            {
+                context.BaseRequests.Remove(item);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeleteAllBaseRequest(string userId)
+        {
+            var item = await context.BaseRequests
+              .Where(c => c.UserId == userId).ToListAsync();
+
+            if (item != null)
+            {
+                context.BaseRequests.RemoveRange(item);
+                await context.SaveChangesAsync();
+            }
+        }
+
         public async Task<List<BaseRequest>> GetBaseRequestsByUser(string userId)
             => await context.BaseRequests
             .Where(c => c.UserId == userId)
@@ -65,7 +104,9 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
         public async Task<int> GetBaseRequestId(string userId, string baseRequestUrl, DateTime creation)
         {
            var item = await context.BaseRequests
-              .FirstOrDefaultAsync(c => c.UserId == userId && c.BaseRequestUrl == baseRequestUrl && c.Creation.Second == creation.Second);
+              .FirstOrDefaultAsync(c => c.UserId == userId 
+              && c.BaseRequestUrl == baseRequestUrl 
+              && c.Creation.Second == creation.Second);
 
             return item.Id;
         }
@@ -81,7 +122,15 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         private async Task<List<SitemapRequest>> GetSitemapRequests(string baseRequestUrl, int baseRequestId)
         {
-            var sitemapUrls = await GetSitemapUrls(baseRequestUrl);
+            List<string> sitemapUrls;
+            try
+            {
+                sitemapUrls = await GetSitemapUrls(baseRequestUrl);
+            }
+            catch (ValidationException exception)
+            {
+                throw exception;
+            }
 
             var sitemapRequests = new List<SitemapRequest>();
 
@@ -128,9 +177,23 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
         {
             List<string> urls = new List<string> { baseRequestUrl };
 
-            var htmlDocument = await new HtmlWeb().LoadFromWebAsync(baseRequestUrl);
+            HtmlNodeCollection nodes;
+            try
+            {
+                var htmlDocument = await new HtmlWeb().LoadFromWebAsync(baseRequestUrl);
+                nodes = htmlDocument.DocumentNode.SelectNodes("//a[@href]");
+            }
+            catch (Exception)
+            {
+                throw new ValidationException("Invalid html document");
+            }
 
-            foreach (var htmlNode in htmlDocument.DocumentNode.SelectNodes("//a[@href]"))
+            if(nodes == null || nodes.Count == 0)
+            {
+                throw new ValidationException("Invalid html document");
+            }
+
+            foreach (var htmlNode in nodes)
             {
                 string href = htmlNode.GetAttributeValue("href", string.Empty);
 

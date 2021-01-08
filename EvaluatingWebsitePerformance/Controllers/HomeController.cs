@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Collections.Generic;
 using System;
+using EvaluatingWebsitePerformance.Infrastructure;
 
 namespace EvaluatingWebsitePerformance.Controllers
 {
@@ -39,7 +40,16 @@ namespace EvaluatingWebsitePerformance.Controllers
                 return RedirectToAction("Index", new { status = "Invalid URL" });
             }
 
-            BaseRequest item = await service.AddBaseRequest(url, User.Identity.GetUserId());
+            BaseRequest item;
+            try
+            {
+                item = await service.AddBaseRequest(url, User.Identity.GetUserId());
+            }
+            catch (ValidationException exception)
+            {
+                return RedirectToAction("Index", new { status = exception.Message });
+            }
+
             ViewData["url"] = url;
 
             var resultModel = new BaseRequestViewModel
@@ -127,6 +137,28 @@ namespace EvaluatingWebsitePerformance.Controllers
             {
                 return await HistoryList();
             }
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ActionResult> RemoveHistoryResult(string baseRequestUrl, DateTime creation)
+        {
+            var userId = User.Identity.GetUserId();
+
+            await service.DeleteBaseRequest(userId, baseRequestUrl, creation);
+
+            return RedirectToAction("HistoryList");
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<ActionResult> RemoveAllHistory()
+        {
+            var userId = User.Identity.GetUserId();
+
+            await service.DeleteAllBaseRequest(userId);
+
+            return RedirectToAction("HistoryList");
         }
     }
 }

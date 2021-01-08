@@ -6,7 +6,10 @@
 
         <ul class="nav navbar-nav navbar-right">
             <li>
-                @Html.ActionLink("History", "HistoryList", "Home", routeValues: null, htmlAttributes: new { title = "History" })
+                @Html.ActionLink("Home", "Index", "Home")
+            </li>
+            <li>
+                @Html.ActionLink("History", "HistoryList", "Home")
             </li>
             <li><a href="javascript:document.getElementById('logoutForm').submit()">Logout</a></li>
         </ul>

@@ -14,5 +14,9 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Interfaces
         Task<List<BaseRequest>> GetBaseRequestsByUser(string userId);
 
         Task<BaseRequest> GetBaseRequests(int id);
+
+        Task DeleteAllBaseRequest(string userId);
+
+        Task DeleteBaseRequest(string userId, string baseRequestUrl, DateTime creation);
     }
 }

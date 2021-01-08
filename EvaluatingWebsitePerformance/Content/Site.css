@@ -53,3 +53,11 @@ img {
 .navbar-inverse, .navbar-toggle {
     background-color: #313131;
 }
+
+.table > thead > tr > th, 
+.table > tbody > tr > th,
+.table > thead > tr > td, 
+.table > tbody > tr > td
+{
+    vertical-align: middle;
+}
