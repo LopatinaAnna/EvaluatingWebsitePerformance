@@ -63,14 +63,18 @@ img {
     vertical-align: middle;
 }
 
-.websiteUrl {
-    width: 70%;
+.websiteUrl,
+.historyWebsiteUrl {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-td{
+.websiteUrl {
+    width: 70%;
+}
+
+td {
     max-width: 400px;
 }
 

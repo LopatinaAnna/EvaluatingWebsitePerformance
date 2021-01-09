@@ -42,8 +42,9 @@ else
             <tbody>
                 @foreach (var request in Model)
                 {
+                    var url = request.BaseRequestUrl;
                     <tr>
-                        <td><a href="@request.BaseRequestUrl">@request.BaseRequestUrl</a></td>
+                        <td class="historyWebsiteUrl" title="@url"><a href="@url">@url</a></td>
                         <td>@request.Creation</td>
                         <td>
                             @using (Html.BeginForm("GetHistory", "Home",
