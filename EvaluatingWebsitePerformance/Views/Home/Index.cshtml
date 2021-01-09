@@ -7,15 +7,26 @@
 {
 <div class="form-group">
     @Html.Label("Enter url", new { @class = "form-label", @for = "inputUrl" })
-    @Html.TextBoxFor(m => m.BaseRequestUrl, new { @class = "form-control", @id = "inputUrl", @type = "url", @maxlength = 1000, @required = true })
+    @Html.TextBoxFor(m => m.BaseRequestUrl,
+    new { @class = "form-control", @id = "inputUrl", @type = "url", @maxlength = 1000, @list = "datalistOptions", @placeholder = "https://example.com", @required = true })
+    <datalist id="datalistOptions">
+        <option value="https://stackoverflow.com/">
+        <option value="https://github.com/">
+        <option value="https://www.youtube.com/">
+        <option value="https://habr.com/ru/">
+        <option value="https://getbootstrap.com/">
+    </datalist>
 </div>
     <div class="form-group">
-        @Html.Label("Number of sitemap’s urls", new { @class = "form-label", @for = "inputUrlsCount" })
-        @Html.TextBoxFor(m => m.UrlsCount, new { @class = "form-control", @id = "inputUrlsCount", @type = "number", @Value = 10, @min = "1", @max = "30", @required = true })
+        @Html.Label("Number of sitemap’s urls", 
+       new { @class = "form-label", @for = "inputUrlsCount" })
+        @Html.TextBoxFor(m => m.UrlsCount, 
+       new { @class = "form-control", @id = "inputUrlsCount", @type = "number", @Value = 10, @min = "1", @max = "30", @required = true })
     </div>
     <div class="form-group">
         @Html.Label("Number of requests to each url", new { @class = "form-label", @for = "inputAttemptCount" })
-        @Html.TextBoxFor(m => m.AttemptCount, new { @class = "form-control", @id = "inputAttemptCount", @type = "number", @Value = 2, @min = "2", @max = "10", @required = true })
+        @Html.TextBoxFor(m => m.AttemptCount, 
+       new { @class = "form-control", @id = "inputAttemptCount", @type = "number", @Value = 2, @min = "2", @max = "10", @required = true })
     </div>
     <div class="form-group">
         <input type="submit" value="Submit" class="btn btn-primary" id="submit-button" />

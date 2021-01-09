@@ -77,3 +77,11 @@ td{
 tr{
     height: 50px;
 }
+
+th {
+    cursor: pointer;
+}
+
+.table > thead > tr > th {
+    border-bottom: none;
+}
