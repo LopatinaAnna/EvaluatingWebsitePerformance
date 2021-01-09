@@ -1,6 +1,6 @@
 # EVALUATING WEBSITE PERFORMANCE
 ASP.NET MVC web application for evaluating website performance. <br/>
-Used technologies: .NET Framework/C#, ASP.NET MVC, MS SQL, Entity Framework, LINQ, Ninject, HTML, CSS, Bootstrap.
+Used technologies: .NET Framework/C#, ASP.NET MVC, MS SQL, Entity Framework, LINQ, Ninject, HTML, CSS, JS, Bootstrap.
 
 ## /Home/Index
 Contains form with inputs for: <br/>
@@ -12,17 +12,19 @@ Registered user can get their tested websites list on 'History' page.
 On the top of the page display pages speed graphic that contain min and max values for each page.<br/>
 On the bottom of the page display page speed as a table.<br/>
 The table contains the requested pages and their minimum and maximum response values.<br/>
-Slowest requests is on top.
+The table can be sorted in ascending and descending order by clicking the header cell of each column.<br/>
+Initially slowest requests is on table top.
 All values presented in (ms).
 
 ## /Home/HistoryList
 Available only for registered users.<br/>
-Contains tested websites list with request url and creation date.<br/>
+Contains table with tested websites list with request url and creation date.<br/>
+The table can be sorted in ascending and descending order by clicking the header cell of each column.<br/>
 History can be removed entirely, or it can be removed as a separate item.
 
 ## /Home/HistoryResult
 Available only for registered users.<br/>
-Contains the result of an already tested website.
+Contains the result of an already tested website and has all the functions of the "/Home/Results" page.
 
 ## /Account/Register
 For register used email address, password and confirm password.<br/>
