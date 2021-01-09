@@ -1,8 +1,10 @@
 # EVALUATING WEBSITE PERFORMANCE
-ASP.NET MVC web application.
+ASP.NET MVC web application for evaluating website performance. <br/>
+Used technologies: .NET Framework/C#, ASP.NET MVC, MS SQL, Entity Framework, LINQ, Ninject, HTML, CSS, Bootstrap.
 
 ## Home
-Contain text box where user can enter URL.<br/>
+Contain form with inputs for: <br/>
+URL, number of sitemap’s URLs, number requests to each URL.<br/>
 Unregistered users can get this page, but their request history will not be stored.<br/>
 Registered user can get their tested websites list on 'History' page
 
