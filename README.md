@@ -24,3 +24,7 @@ Password must be at least 6 characters.
 
 ## Login
 For login used email address and password.
+
+## Test account
+email: test@gmail.com<br/>
+password: qwerty
