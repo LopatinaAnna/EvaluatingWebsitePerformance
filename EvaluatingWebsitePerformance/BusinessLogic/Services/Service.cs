@@ -2,6 +2,7 @@
 using EvaluatingWebsitePerformance.Data;
 using EvaluatingWebsitePerformance.Data.Entities;
 using EvaluatingWebsitePerformance.Infrastructure;
+using EvaluatingWebsitePerformance.Models;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
@@ -17,25 +18,35 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
     {
         private readonly ApplicationDbContext context;
 
-        private const int ATTEMPT_COUNT = 3;
+        private int ATTEMPT_COUNT = 2;
 
-        private const int SITEMAP_URLS_COUNT = 10;
+        private int SITEMAP_URLS_COUNT = 10;
 
         public Service(ApplicationDbContext _context)
         {
             context = _context;
         }
 
-        public async Task<BaseRequest> AddBaseRequest(string baseRequestUrl, string userId)
+        public async Task<BaseRequest> AddBaseRequest(CreateBaseRequestModel model)
         {
+            if(model.UrlsCount >= 1 && model.UrlsCount <= 30)
+            {
+                SITEMAP_URLS_COUNT = model.UrlsCount;
+            }
+
+            if (model.AttemptCount >= 3 && model.AttemptCount <= 10)
+            {
+                ATTEMPT_COUNT = model.AttemptCount;
+            }
+            
             // Init base request
 
             DateTime creation = DateTime.Now;
             var item = new BaseRequest
             {
-                BaseRequestUrl = baseRequestUrl,
+                BaseRequestUrl = model.BaseRequestUrl,
                 Creation = creation,
-                UserId = userId
+                UserId = model.UserId
             };
 
             context.BaseRequests.Add(item);
@@ -44,17 +55,17 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             // Add to base request list of sitemap requests
 
-            var userRequests = await GetBaseRequestsByUser(userId);
+            var userRequests = await GetBaseRequestsByUser(model.UserId);
 
             var baseRequest = userRequests
-                .FirstOrDefault(c => c.BaseRequestUrl == baseRequestUrl
+                .FirstOrDefault(c => c.BaseRequestUrl == model.BaseRequestUrl
                 && c.Creation.Second == creation.Second);
 
             List<SitemapRequest> sitemapsList;
 
             try
             {
-                sitemapsList = await GetSitemapRequests(baseRequestUrl, baseRequest.Id);
+                sitemapsList = await GetSitemapRequests(model.BaseRequestUrl, baseRequest.Id);
             }
             catch (ValidationException exception)
             {
@@ -225,6 +236,9 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
                 {
                     urls.Add(href);
                 }
+
+                if (urls.Distinct().Count() == SITEMAP_URLS_COUNT)
+                    break;
             }
             return urls
                 .Select(c => c.StartsWith("/") ? stringUrl + c : c)

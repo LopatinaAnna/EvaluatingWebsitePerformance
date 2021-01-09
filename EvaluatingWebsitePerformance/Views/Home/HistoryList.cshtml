@@ -36,7 +36,7 @@ else
                 {
                     <tr>
                         <th>@i</th>
-                        <td>@request.BaseRequestUrl</td>
+                        <td><a href="@request.BaseRequestUrl">@request.BaseRequestUrl</a></td>
                         <td>@request.Creation</td>
                         <td>
                             @using (Html.BeginForm("GetHistory", "Home",

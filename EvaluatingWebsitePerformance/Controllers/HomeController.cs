@@ -37,18 +37,31 @@ namespace EvaluatingWebsitePerformance.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Results(string url)
+        public async Task<ActionResult> Results(CreateBaseRequestModel model)
         {
-            var isValid = ValidateUrl(url);
+            if(model.UrlsCount < 0 || model.UrlsCount > 30)
+            {
+                return RedirectToAction("Index", new { status = "Number of sitemap’s urls must be in the range of 1 to 30" });
+            }
+
+            if (model.AttemptCount < 2 || model.AttemptCount > 10)
+            {
+                return RedirectToAction("Index", new { status = "Number of requests to each url must be in the range of 2 to 10" });
+            }
+
+            var isValid = ValidateUrl(model.BaseRequestUrl);
+
             if (!isValid.Item1)
             {
                 return RedirectToAction("Index", new { status = isValid.Item2 });
             }
 
             BaseRequest item;
+            model.UserId = User.Identity.GetUserId();
+
             try
             {
-                item = await service.AddBaseRequest(url, User.Identity.GetUserId());
+                item = await service.AddBaseRequest(model);
             }
             catch (ValidationException exception)
             {
@@ -88,6 +101,8 @@ namespace EvaluatingWebsitePerformance.Controllers
             {
                 BaseRequestUrl = baseRequest.BaseRequestUrl,
                 SitemapRequests = baseRequest.SitemapRequests
+                .OrderBy(c => c.MinResponseTime)
+                .ToList()
             };
 
             return View(baseRequestViewModel);

@@ -1,4 +1,5 @@
 ﻿using EvaluatingWebsitePerformance.Data.Entities;
+using EvaluatingWebsitePerformance.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Interfaces
 {
     public interface IService : IDisposable
     {
-        Task<BaseRequest> AddBaseRequest(string baseRequestUrl, string userId);
+        Task<BaseRequest> AddBaseRequest(CreateBaseRequestModel model);
 
         Task<int> GetBaseRequestId(string userId, string baseRequestUrl, DateTime creation);
 
