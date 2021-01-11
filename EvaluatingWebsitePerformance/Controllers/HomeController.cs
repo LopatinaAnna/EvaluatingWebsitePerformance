@@ -82,7 +82,7 @@ namespace EvaluatingWebsitePerformance.Controllers
 
             var baseRequest = await service.GetBaseRequest(requestId);
 
-            if (baseRequest.UserId != User.Identity.GetUserId())
+            if (baseRequest == null || baseRequest.UserId != User.Identity.GetUserId())
             {
                 return RedirectToAction("Index");
             }
