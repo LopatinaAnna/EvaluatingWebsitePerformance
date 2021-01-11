@@ -39,16 +39,6 @@ namespace EvaluatingWebsitePerformance.Controllers
         [HttpPost]
         public async Task<ActionResult> Results(CreateBaseRequestModel model)
         {
-            if(model.UrlsCount < 0 || model.UrlsCount > 30)
-            {
-                return RedirectToAction("Index", new { status = "Number of sitemap’s urls must be in the range of 1 to 30" });
-            }
-
-            if (model.AttemptCount < 2 || model.AttemptCount > 10)
-            {
-                return RedirectToAction("Index", new { status = "Number of requests to each url must be in the range of 2 to 10" });
-            }
-
             var isValid = ValidateUrl(model.BaseRequestUrl);
 
             if (!isValid.Item1)
