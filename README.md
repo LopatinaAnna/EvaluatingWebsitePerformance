@@ -3,10 +3,9 @@ ASP.NET MVC web application for evaluating website performance. <br/>
 Used technologies: .NET Framework/C#, ASP.NET MVC, MS SQL, Entity Framework, LINQ, Ninject, HTML, CSS, JS, Bootstrap.
 
 ## /Home/Index
-Contains form with inputs for: <br/>
-URL, number of sitemap’s URLs, number requests to each URL.<br/>
+Contains text box where user can enter URL.<br/>
 Unregistered users can get this page, but their request history will not be stored.<br/>
-Registered user can get their tested websites list on 'History' page.
+Registered user can get their tested websites list on '/Home/HistoryList' page.
 
 ## /Home/Results
 On the top of the page display pages speed graphic that contain min and max values for each page.<br/>
