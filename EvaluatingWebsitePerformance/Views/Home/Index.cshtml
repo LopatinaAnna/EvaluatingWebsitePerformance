@@ -3,23 +3,23 @@
 }
 @model EvaluatingWebsitePerformance.Models.CreateBaseRequestModel
 
-@using (Html.BeginForm("Results", "Home", FormMethod.Post, new { @class = "input-url" }))
+@using (Html.BeginForm("Results", "Home", FormMethod.Post,
+    new { @class = "input-url", @id = "getResultForm", @onsubmit = "submit_form(this);return false;" }))
 {
-<div class="form-group">
-    @Html.Label("Enter url", new { @class = "form-label", @for = "inputUrl" })
-    @Html.TextBoxFor(m => m.BaseRequestUrl,
-    new { @class = "form-control", @id = "inputUrl", @type = "url", @maxlength = 1000, @list = "datalistOptions", @placeholder = "https://example.com", @required = true })
-    <datalist id="datalistOptions">
-        <option value="https://www.ukad-group.com/">
-        <option value="https://stackoverflow.com/">
-        <option value="https://github.com/">
-        <option value="https://www.youtube.com/">
-        <option value="https://habr.com/ru/">
-        <option value="https://getbootstrap.com/">
-    </datalist>
-</div>
     <div class="form-group">
-        <input type="submit" value="Submit" class="btn btn-primary" id="submit-button" />
+        @Html.Label("Enter URL", new { @class = "form-label", @for = "inputUrl" })
+        @Html.TextBoxFor(m => m.BaseRequestUrl,
+        new { @class = "form-control", @id = "inputUrl", @type = "url", @maxlength = 1000, @list = "datalistOptions", @placeholder = "https://example.com", @required = true })
+        <datalist id="datalistOptions">
+            <option value="https://www.ukad-group.com/">
+            <option value="https://dotnet.microsoft.com/">
+            <option value="https://docs.microsoft.com/">
+            <option value="https://stackoverflow.com/">
+            <option value="https://github.com/">
+        </datalist>
+    </div>
+    <div class="form-group">
+        <button type="submit" id="submitButton" class="btn btn-primary">Submit</button>
     </div>
 }
 
@@ -37,3 +37,6 @@ else
         &rsaquo; @Html.ActionLink("View history", "HistoryList", "Home")
     </div>
 }
+
+@Scripts.Render("https://code.jquery.com/jquery-3.3.1.slim.min.js")
+@Scripts.Render("~/Scripts/inputUrlValidation.js")

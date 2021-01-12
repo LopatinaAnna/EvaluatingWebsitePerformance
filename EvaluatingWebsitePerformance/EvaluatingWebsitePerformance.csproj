@@ -267,6 +267,7 @@
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\chartLoad.js" />
     <Content Include="Scripts\tableSort.js" />
+    <Content Include="Scripts\inputUrlValidation.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="bin\roslyn\csc.exe.config" />
