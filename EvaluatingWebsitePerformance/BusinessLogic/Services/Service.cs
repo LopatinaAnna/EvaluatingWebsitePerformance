@@ -20,6 +20,8 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         private int ATTEMPT_COUNT = 2;
 
+        private const int URLS_LIMIT = 500;
+
         public Service(ApplicationDbContext _context)
         {
             context = _context;
@@ -135,42 +137,20 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             var stringUrl = string.Concat(url.Scheme, "://", url.Host);
 
-            HtmlNodeCollection nodes;
-            try
-            {
-                var htmlDocument = await new HtmlWeb().LoadFromWebAsync(stringUrl);
-                nodes = htmlDocument.DocumentNode.SelectNodes("//a[@href]");
-            }
-            catch (Exception)
-            {
-                throw new ValidationException("Invalid resource");
-            }
+            var urlsList = await GetSitemapUrlsFromHtml(stringUrl);
 
-            if (nodes == null || nodes.Count == 0)
+            foreach (var sitemapUrl in urlsList)
             {
-                throw new ValidationException("Invalid resource");
-            }
-
-            foreach (var htmlNode in nodes)
-            {
-                string href = htmlNode.GetAttributeValue("href", string.Empty);
-
-                href = (href.StartsWith("/") && !href.StartsWith("/#")) ? (stringUrl + href) : href;
-
-                if (href.StartsWith(stringUrl) && !foundUrls.Contains(href))
-                {
-                    foundUrls.Add(href);
                     SitemapRequest sitemapRequest;
                     try
                     {
-                        sitemapRequest = await GetSitemapRequest(href, baseRequestId);
+                        sitemapRequest = await GetSitemapRequest(sitemapUrl, baseRequestId);
                     }
                     catch (Exception)
                     {
                         continue;
                     }
                     sitemapRequests.Add(sitemapRequest);
-                }
             }
 
             return sitemapRequests;
@@ -210,6 +190,51 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             return sitemapRequest;
         }
+
+        private async Task<List<string>> GetSitemapUrlsFromHtml(string baseUrl)
+        {
+            var urlsList = new List<string> { baseUrl.EndsWith("/") ? baseUrl : baseUrl + "/" };
+
+            for (int i = 0; i < urlsList.Count && urlsList.Count <= URLS_LIMIT; i++)
+            {
+                HtmlNodeCollection nodes;
+                try
+                {
+                    var htmlDocument = await new HtmlWeb().LoadFromWebAsync(urlsList[i]);
+                    nodes = htmlDocument.DocumentNode.SelectNodes("//a[@href]");
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+
+                if (nodes == null || nodes.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var htmlNode in nodes)
+                {
+                    if(urlsList.Count > URLS_LIMIT)
+                    {
+                        break;
+                    }
+
+                    string href = htmlNode.GetAttributeValue("href", string.Empty);
+
+                    href = (href != "/" && href.StartsWith("/") && !href.StartsWith("/#")) ? (baseUrl + href) : href;
+
+                    href = href.Split('?')[0].Split('#')[0];
+
+                    if (href.StartsWith(baseUrl) && !urlsList.Contains(href))
+                    {
+                        urlsList.Add(href);
+                    }
+                }
+            }
+
+            return urlsList;
+        } 
 
         private async Task<double> GetRequestTime(string item)
         {
