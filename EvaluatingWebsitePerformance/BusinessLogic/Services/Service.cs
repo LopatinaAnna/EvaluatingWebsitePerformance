@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 {
@@ -18,9 +19,9 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
     {
         private readonly ApplicationDbContext context;
 
-        private int ATTEMPT_COUNT = 2;
+        private const int URLS_LIMIT = 300;
 
-        private const int URLS_LIMIT = 500;
+        private const int REQUESTS_FOR_EACH_URL = 2;
 
         public Service(ApplicationDbContext _context)
         {
@@ -29,37 +30,30 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         public async Task<BaseRequest> AddBaseRequest(CreateBaseRequestModel model)
         {
-            // Init base request
-
-            DateTime creation = DateTime.Now;
             var item = new BaseRequest
             {
                 BaseRequestUrl = model.BaseRequestUrl,
-                Creation = creation,
+                Creation = DateTime.Now,
                 UserId = model.UserId
             };
 
-            context.BaseRequests.Add(item);
-
-            await context.SaveChangesAsync();
-
-            // Add to base request list of sitemap requests
-
-            var userRequests = await GetBaseRequestsByUser(model.UserId);
-
-            var baseRequest = userRequests
-                .FirstOrDefault(c => c.BaseRequestUrl == model.BaseRequestUrl
-                && c.Creation.Second == creation.Second);
+            var baseRequest = await CreateBaseRequest(item);
 
             List<SitemapRequest> sitemapsList;
 
             try
             {
-                sitemapsList = await GetSitemapRequests(model.BaseRequestUrl, baseRequest.Id);
+                sitemapsList = await GetSitemapRequests(
+                    baseRequest.BaseRequestUrl, 
+                    baseRequest.Id);
             }
             catch (ValidationException exception)
             {
-                await DeleteBaseRequest(baseRequest.UserId, baseRequest.BaseRequestUrl, baseRequest.Creation);
+                await DeleteBaseRequest(
+                    baseRequest.UserId, 
+                    baseRequest.BaseRequestUrl, 
+                    baseRequest.Creation);
+
                 throw exception;
             }
 
@@ -70,18 +64,13 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             return baseRequest;
         }
 
-        public async Task AddSitemapRequest(SitemapRequest sitemapRequest)
-        {
-            context.SitemapRequests.Add(sitemapRequest);
-            await context.SaveChangesAsync();
-        }
-
         public async Task DeleteBaseRequest(string userId, string baseRequestUrl, DateTime creation)
         {
             var item = await context.BaseRequests
-              .FirstOrDefaultAsync(c => c.UserId == userId
-              && c.BaseRequestUrl == baseRequestUrl
-              && c.Creation.Second == creation.Second);
+              .FirstOrDefaultAsync(c => 
+              c.UserId == userId && 
+              c.BaseRequestUrl == baseRequestUrl && 
+              c.Creation.Second == creation.Second);
 
             if (item != null)
             {
@@ -102,11 +91,6 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             }
         }
 
-        public async Task<List<BaseRequest>> GetBaseRequestsByUser(string userId)
-            => await context.BaseRequests
-            .Where(c => c.UserId == userId)
-            .ToListAsync();
-
         public async Task<int> GetBaseRequestId(string userId, string baseRequestUrl, DateTime creation)
         {
             var item = await context.BaseRequests
@@ -116,7 +100,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
             if (item == null || item == default)
             {
-                return default;
+                throw new ValidationException("Request not found");
             }
 
             return item.Id;
@@ -127,44 +111,101 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             .Include(c => c.SitemapRequests)
             .FirstOrDefaultAsync(c => c.Id == id);
 
+
+        public async Task<List<BaseRequest>> GetBaseRequestsByUser(string userId)
+            => await context.BaseRequests
+            .Where(c => c.UserId == userId)
+            .ToListAsync();
+        
+
+        #region Helpers
+
+        private async Task<BaseRequest> CreateBaseRequest(BaseRequest baseRequest)
+        {
+            context.BaseRequests.Add(baseRequest);
+
+            await context.SaveChangesAsync();
+
+            var userRequests = await GetBaseRequestsByUser(baseRequest.UserId);
+
+            return userRequests
+                .FirstOrDefault(c => c.BaseRequestUrl == baseRequest.BaseRequestUrl
+                && c.Creation.Second == baseRequest.Creation.Second);
+        }
+
+        private async Task CreateSitemapRequest(SitemapRequest sitemapRequest)
+        {
+            context.SitemapRequests.Add(sitemapRequest);
+            await context.SaveChangesAsync();
+        }
+
         private async Task<List<SitemapRequest>> GetSitemapRequests(string baseRequestUrl, int baseRequestId)
         {
+            List<string> urlsList;
+            try
+            {
+                urlsList = await GetSitemapUrls(baseRequestUrl);
+            }
+            catch (ValidationException exeption)
+            {
+                throw exeption;
+            }
+
             List<SitemapRequest> sitemapRequests = new List<SitemapRequest>();
-
-            List<string> foundUrls = new List<string>();
-
-            var url = new Uri(baseRequestUrl);
-
-            var stringUrl = string.Concat(url.Scheme, "://", url.Host);
-
-            var urlsList = await GetSitemapUrlsFromHtml(stringUrl);
 
             foreach (var sitemapUrl in urlsList)
             {
-                    SitemapRequest sitemapRequest;
-                    try
-                    {
-                        sitemapRequest = await GetSitemapRequest(sitemapUrl, baseRequestId);
-                    }
-                    catch (Exception)
-                    {
-                        continue;
-                    }
-                    sitemapRequests.Add(sitemapRequest);
+                SitemapRequest sitemapRequest;
+                try
+                {
+                    sitemapRequest = await GetSitemapRequest(sitemapUrl, baseRequestId);
+                }
+                catch
+                {
+                    continue;
+                }
+                sitemapRequests.Add(sitemapRequest);
             }
 
             return sitemapRequests;
         }
 
+        private async Task<List<string>> GetSitemapUrls(string baseRequestUrl)
+        {
+            List<string> urlsList;
+
+            var url = new Uri(baseRequestUrl);
+
+            var baseUrl = string.Concat(url.Scheme, "://", url.Host, "/");
+
+            try
+            {
+                urlsList = GetSitemapUrlsFromXml(baseUrl);
+            }
+            catch
+            {
+                try
+                {
+                    urlsList = await GetSitemapUrlsFromHtml(baseUrl);
+                }
+                catch (ValidationException htmlException)
+                {
+                    throw htmlException;
+                }
+            }
+
+            return urlsList;
+        }
+
         private async Task<SitemapRequest> GetSitemapRequest(string sitemapUrl, int baseRequestId)
         {
-            var sitemapRequest = new SitemapRequest 
-            { 
-                SitemapRequestUrl = sitemapUrl, 
-                BaseRequestId = baseRequestId 
+            var sitemapRequest = new SitemapRequest
+            {
+                SitemapRequestUrl = sitemapUrl,
+                BaseRequestId = baseRequestId
             };
 
-            for (int i = 0; i < ATTEMPT_COUNT; i++)
+            for (int i = 0; i < REQUESTS_FOR_EACH_URL; i++)
             {
                 double time = await GetRequestTime(sitemapUrl);
 
@@ -181,7 +222,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
                 sitemapRequest.MinResponseTime = sitemapRequest.ResponseTimes.Min();
                 sitemapRequest.MaxResponseTime = sitemapRequest.ResponseTimes.Max();
 
-                await AddSitemapRequest(sitemapRequest);
+                await CreateSitemapRequest(sitemapRequest);
             }
             else
             {
@@ -193,7 +234,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
         private async Task<List<string>> GetSitemapUrlsFromHtml(string baseUrl)
         {
-            var urlsList = new List<string> { baseUrl.EndsWith("/") ? baseUrl : baseUrl + "/" };
+            var urlsList = new List<string> { baseUrl };
 
             for (int i = 0; i < urlsList.Count && urlsList.Count <= URLS_LIMIT; i++)
             {
@@ -215,14 +256,14 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
 
                 foreach (var htmlNode in nodes)
                 {
-                    if(urlsList.Count > URLS_LIMIT)
+                    if (urlsList.Count > URLS_LIMIT)
                     {
                         break;
                     }
 
                     string href = htmlNode.GetAttributeValue("href", string.Empty);
 
-                    href = (href != "/" && href.StartsWith("/") && !href.StartsWith("/#")) ? (baseUrl + href) : href;
+                    href = (href != "/" && href.StartsWith("/") && !href.StartsWith("/#")) ? (baseUrl + href.Substring(1)) : href;
 
                     href = href.Split('?')[0].Split('#')[0];
 
@@ -234,7 +275,44 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             }
 
             return urlsList;
-        } 
+        }
+
+        private List<string> GetSitemapUrlsFromXml(string baseUrl)
+        {
+            var urlsList = new List<string>();
+
+            XDocument xDocument;
+
+            XNamespace xNamespace;
+
+            try
+            {
+                xDocument = XDocument.Load(baseUrl + "sitemap.xml");
+
+                xNamespace = xDocument.Root.Name.Namespace;
+            }
+            catch (Exception)
+            {
+                throw new ValidationException("Failed to load xml");
+            }
+
+            foreach (var xElement in xDocument.Root.Elements())
+            {
+                var locElement = xElement.Element(xNamespace + "loc");
+
+                if (locElement != null && !locElement.Value.EndsWith(".xml"))
+                {
+                    urlsList.Add(locElement.Value);
+                }
+            }
+
+            if (urlsList.Count() == 0)
+            {
+                throw new ValidationException("Failed to load xml");
+            }
+
+            return urlsList;
+        }
 
         private async Task<double> GetRequestTime(string item)
         {
@@ -242,6 +320,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             Stopwatch timer = new Stopwatch();
 
             timer.Start();
+
             try
             {
                 await request.GetResponseAsync();
@@ -250,6 +329,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             {
                 return 0;
             }
+
             timer.Stop();
 
             return Math.Round(timer.Elapsed.TotalMilliseconds);
@@ -274,5 +354,8 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        #endregion Helpers
+    
     }
 }

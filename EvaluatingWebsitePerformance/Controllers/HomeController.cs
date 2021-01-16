@@ -112,7 +112,7 @@ namespace EvaluatingWebsitePerformance.Controllers
                 Creation = c.Creation
             }));
 
-            return View(resultHistoryList);
+            return View(resultHistoryList.OrderByDescending(c => c.Creation));
         }
 
         [Authorize]
@@ -126,16 +126,18 @@ namespace EvaluatingWebsitePerformance.Controllers
 
             var userId = User.Identity.GetUserId();
 
-            var requestId = await service.GetBaseRequestId(userId, url, creation);
+            int requestId;
 
-            if (requestId > 0)
+            try
             {
-                return RedirectToAction("HistoryResult", new { id = requestId });
+                requestId = await service.GetBaseRequestId(userId, url, creation);
             }
-            else
+            catch (Exception)
             {
                 return RedirectToAction("HistoryList");
             }
+
+            return RedirectToAction("HistoryResult", new { id = requestId });
         }
 
         [Authorize]
@@ -171,7 +173,7 @@ namespace EvaluatingWebsitePerformance.Controllers
             {
                 return (false, "Incorrect input");
             }
-            
+
             try
             {
                 new Uri(url);
