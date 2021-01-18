@@ -311,7 +311,7 @@ namespace EvaluatingWebsitePerformance.BusinessLogic.Services
                 throw new ValidationException("Failed to load xml");
             }
 
-            return urlsList;
+            return urlsList.Distinct().ToList();
         }
 
         private async Task<double> GetRequestTime(string item)
