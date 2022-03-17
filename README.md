@@ -2,6 +2,8 @@
 ASP.NET MVC web application for evaluating website performance. <br/>
 Used technologies: .NET Framework/C#, ASP.NET MVC, MS SQL, Entity Framework, LINQ, Ninject, HTML, CSS, JS, Bootstrap.
 
+![image](https://user-images.githubusercontent.com/31049074/158863255-690cf661-46ba-40c9-a5ba-0cfcfe07a596.png)
+
 ## /Home/Index
 Contains text box where user can enter URL.<br/>
 Unregistered users can get this page, but their request history will not be stored.<br/>
